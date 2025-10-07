@@ -20,11 +20,11 @@ Employees can log in, select tables, take customer orders, and manage them effic
 
 ### 💻 Design
 #### Login Screen
-![Employee Login](https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/design/Employee-login.png)
+![Employee Login](https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/design/dark/Employee-login.png)
 
 #### Home Screen
 
-![Home Screen](https://github.com/vinhphuphan/EasyDining/blob/main/design/home-screen.png)
+![Home Screen](https://github.com/vinhphuphan/EasyDining/blob/main/design/dark/home-screen.png)
 
 #### Menu Screen
 
