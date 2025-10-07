@@ -28,7 +28,7 @@ Employees can log in, select tables, take customer orders, and manage them effic
 
 #### Menu Screen
 
-![Menu Screen](https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/design/menu-screen.png)
+![Menu Screen](https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/design/dark/menu-screen.png)
 
 ---
 Have fun building! 🚀🚀🚀
