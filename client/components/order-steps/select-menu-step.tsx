@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, ShoppingCart, Trash2, Minus, Plus, MoreHorizontal } from "lucide-react"
 import { menuItems } from "@/lib/mock-data"
-import type { OrderFormData } from "@/components/create-order-modal"
-import { AddItemModal } from "@/components/add-item-modal"
+import type { OrderFormData } from "@/components/modals/create-order-modal"
+import { AddItemModal } from "@/components/modals/add-item-modal"
 
 interface SelectMenuStepProps {
   formData: OrderFormData
@@ -116,11 +116,10 @@ export function SelectMenuStep({ formData, setFormData, onNext }: SelectMenuStep
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedCategory === category
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === category
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               {category} <Badge className="ml-2">{categoryCounts[category]}</Badge>
             </button>

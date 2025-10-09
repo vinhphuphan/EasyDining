@@ -5,7 +5,7 @@ import { X, User, Bell, Lock, Monitor, Check } from "lucide-react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { PinPad } from "@/components/pin-pad"
+import { PinPad } from "@/components/login-pin/pin-pad"
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -58,36 +58,32 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <h2 className="text-lg font-semibold mb-4">Setting</h2>
               <button
                 onClick={() => setActiveTab("employee")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                  activeTab === "employee" ? "bg-background shadow-sm" : "hover:bg-background/50"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "employee" ? "bg-background shadow-sm" : "hover:bg-background/50"
+                  }`}
               >
                 <User className="h-5 w-5" />
                 <span className="text-sm font-medium">Employee Info</span>
               </button>
               <button
                 onClick={() => setActiveTab("notification")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                  activeTab === "notification" ? "bg-background shadow-sm" : "hover:bg-background/50"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "notification" ? "bg-background shadow-sm" : "hover:bg-background/50"
+                  }`}
               >
                 <Bell className="h-5 w-5" />
                 <span className="text-sm font-medium">Notification</span>
               </button>
               <button
                 onClick={() => setActiveTab("security")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                  activeTab === "security" ? "bg-background shadow-sm" : "hover:bg-background/50"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "security" ? "bg-background shadow-sm" : "hover:bg-background/50"
+                  }`}
               >
                 <Lock className="h-5 w-5" />
                 <span className="text-sm font-medium">Security</span>
               </button>
               <button
                 onClick={() => setActiveTab("display")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                  activeTab === "display" ? "bg-background shadow-sm" : "hover:bg-background/50"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "display" ? "bg-background shadow-sm" : "hover:bg-background/50"
+                  }`}
               >
                 <Monitor className="h-5 w-5" />
                 <span className="text-sm font-medium">Display</span>
@@ -224,9 +220,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 {[...Array(6)].map((_, i) => (
                   <div
                     key={i}
-                    className={`h-12 w-12 rounded-lg border-2 flex items-center justify-center ${
-                      i < pin.length ? "border-primary bg-primary/10" : "border-muted"
-                    }`}
+                    className={`h-12 w-12 rounded-lg border-2 flex items-center justify-center ${i < pin.length ? "border-primary bg-primary/10" : "border-muted"
+                      }`}
                   >
                     {i < pin.length && <div className="h-3 w-3 rounded-full bg-primary" />}
                   </div>

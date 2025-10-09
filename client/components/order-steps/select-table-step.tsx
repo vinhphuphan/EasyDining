@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { tables } from "@/lib/mock-data"
-import type { OrderFormData } from "@/components/create-order-modal"
+import type { OrderFormData } from "@/components/modals/create-order-modal"
 import { Clock } from "lucide-react"
 
 interface SelectTableStepProps {
@@ -65,11 +65,10 @@ export function SelectTableStep({ formData, setFormData, onNext }: SelectTableSt
               <button
                 key={floor}
                 onClick={() => setSelectedFloor(floor)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedFloor === floor
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedFloor === floor
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 {floor === "First Floor" ? "1st Floor" : floor === "Second Floor" ? "2nd Floor" : "3rd Floor"}
               </button>
@@ -89,15 +88,14 @@ export function SelectTableStep({ formData, setFormData, onNext }: SelectTableSt
                 key={table.id}
                 onClick={() => handleTableSelect(table.number, table.status)}
                 disabled={!isAvailable}
-                className={`relative aspect-square rounded-2xl border-4 flex flex-col items-center justify-center transition-all ${
-                  isSelected
+                className={`relative aspect-square rounded-2xl border-4 flex flex-col items-center justify-center transition-all ${isSelected
                     ? "border-primary bg-primary/10 scale-105"
                     : isAvailable
                       ? "border-border bg-card hover:border-primary/50 hover:scale-105"
                       : isOccupied
                         ? "border-orange-500 bg-orange-500/10 cursor-not-allowed"
                         : "border-muted bg-muted cursor-not-allowed opacity-50"
-                }`}
+                  }`}
               >
                 <span className="text-2xl font-bold mb-2">{table.number}</span>
                 {isOccupied && table.currentOrderId && (

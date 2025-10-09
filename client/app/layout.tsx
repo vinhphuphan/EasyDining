@@ -1,11 +1,14 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
-import Header from "@/components/header"
+import Header from "@/components/header/header"
+import { CreateOrderModalProvider } from "@/context/CreateOrderModalProvider"
+import CreateOrderModalRenderer from "@/components/modals/create-order-modal-renderer"
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "EasyDining - Restaurant POS System",
@@ -15,16 +18,35 @@ export const metadata: Metadata = {
   },
 }
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <Header />
-        <Suspense fallback={null}>{children}</Suspense>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className={`font-sans`}>
+        <CreateOrderModalProvider>
+          <Header />
+          <Suspense fallback={null}>{children}</Suspense>
+          <CreateOrderModalRenderer />
+        </CreateOrderModalProvider>
+        <Toaster
+          theme="system"
+          richColors
+          position="top-center"
+          duration={1000}
+          toastOptions={{
+            classNames: {
+              toast: "bg-card text-foreground border border-input shadow-sm",
+              title: "font-medium",
+              description: "text-muted-foreground",
+              actionButton: "bg-primary text-primary-foreground",
+              cancelButton: "bg-muted text-foreground",
+            },
+          }}
+        />
         <Analytics />
       </body>
     </html>

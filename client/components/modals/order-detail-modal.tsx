@@ -4,7 +4,7 @@ import { useState } from "react"
 import { X, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { PaymentModal } from "@/components/payment-modal"
+import { PaymentModal } from "@/components/modals/payment-modal"
 import type { Order } from "@/lib/mock-data"
 
 interface OrderDetailModalProps {

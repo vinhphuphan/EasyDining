@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { X, ArrowLeft, User, UtensilsCrossed, ClipboardList } from "lucide-react"
+import { toast } from "sonner"
 import { OrderInfoStep } from "@/components/order-steps/order-info-step"
 import { SelectTableStep } from "@/components/order-steps/select-table-step"
 import { SelectMenuStep } from "@/components/order-steps/select-menu-step"
@@ -39,6 +40,17 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
     items: [],
   })
 
+  // Local flag to trigger entrance animation on mount
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      const id = requestAnimationFrame(() => setShow(true))
+      return () => cancelAnimationFrame(id)
+    }
+    setShow(false)
+  }, [isOpen])
+
   if (!isOpen) return null
 
   const handleBack = () => {
@@ -62,6 +74,7 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
       customerName: "",
       items: [],
     })
+    toast.success("Order created successfully")
     onClose()
   }
 
@@ -73,8 +86,14 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
   ]
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-background rounded-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${show ? "bg-black/50 opacity-100" : "bg-black/50 opacity-0"
+        }`}
+    >
+      <div
+        className={`bg-background rounded-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all duration-250 ease-out ${show ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          }`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-4">
@@ -88,13 +107,12 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
                 <div key={s.number} className="flex items-center gap-3">
                   <button
                     onClick={() => s.number < step && setStep(s.number as 1 | 2 | 3 | 4)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      step === s.number
-                        ? "bg-primary text-primary-foreground"
-                        : step > s.number
-                          ? "bg-primary/20 text-primary hover:bg-primary/30"
-                          : "bg-muted text-muted-foreground"
-                    }`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${step === s.number
+                      ? "bg-primary text-primary-foreground"
+                      : step > s.number
+                        ? "bg-primary/20 text-primary hover:bg-primary/30"
+                        : "bg-muted text-muted-foreground"
+                      }`}
                   >
                     <s.icon className="h-4 w-4" />
                     {s.label}

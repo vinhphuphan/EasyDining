@@ -6,16 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { OrderCard } from "@/components/order-card"
+import { OrderCard } from "@/components/cards/order-card"
 import { NotificationPanel } from "@/components/notification-panel"
-import { CreateOrderModal } from "@/components/create-order-modal"
-import { OrderDetailModal } from "@/components/order-detail-modal"
+import { useCreateOrderModal } from "@/context/CreateOrderModalProvider"
+import { OrderDetailModal } from "@/components/modals/order-detail-modal"
 import { orders } from "@/lib/mock-data"
 import type { Order } from "@/lib/mock-data"
 
 export default function OrderPage() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
-  const [isCreateOrderOpen, setIsCreateOrderOpen] = useState(false)
+  const { openModal } = useCreateOrderModal()
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [activeTab, setActiveTab] = useState<"all" | "in-progress" | "ready" | "waiting-payment">("all")
   const [sortBy, setSortBy] = useState<"latest" | "oldest" | "type">("latest")
@@ -68,7 +68,7 @@ export default function OrderPage() {
               className="pl-10"
             />
           </div>
-          <Button size="lg" onClick={() => setIsCreateOrderOpen(true)}>
+          <Button className="cursor-pointer" size="lg" onClick={openModal}>
             <Plus className="h-5 w-5 mr-2" />
             Create New Order
           </Button>
@@ -173,7 +173,7 @@ export default function OrderPage() {
 
       {/* Modals */}
       <NotificationPanel isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
-      <CreateOrderModal isOpen={isCreateOrderOpen} onClose={() => setIsCreateOrderOpen(false)} />
+      {/* Global modal rendered by provider */}
       {selectedOrder && <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />}
     </div>
   )

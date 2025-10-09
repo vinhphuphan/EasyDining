@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Plus } from "lucide-react"
+import { Search, Plus, SquareMenu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { NotificationPanel } from "@/components/notification-panel"
-import { AddDishModal } from "@/components/add-dish-modal"
+import { AddDishModal } from "@/components/modals/add-dish-modal"
 import { menuItems } from "@/lib/mock-data"
 
 
@@ -167,15 +167,8 @@ export default function InventoryPage() {
           {/* Page Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                />
-              </svg>
-              <h1 className="text-2xl font-semibold">Inventory</h1>
+              <SquareMenu className="h-6 w-6" />
+              <h1 className="text-2xl font-semibold">Menu</h1>
             </div>
           </div>
 

@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { Users, Baby, User, Table } from "lucide-react"
-import type { OrderFormData } from "@/components/create-order-modal"
+import type { OrderFormData } from "@/components/modals/create-order-modal"
+import { toast } from "sonner"
 
 interface OrderSummaryStepProps {
   formData: OrderFormData
@@ -18,9 +19,8 @@ export function OrderSummaryStep({ formData, onClose }: OrderSummaryStepProps) {
   const total = subtotal + tax
 
   const handleCreateOrder = () => {
-    console.log("[v0] Creating order:", formData)
+    console.log("Creating order:", formData)
     // Here you would typically send the order to your backend
-    alert("Order created successfully!")
     onClose()
   }
 

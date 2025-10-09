@@ -4,16 +4,18 @@ import { useState } from "react"
 import { CreditCard, Clock, CheckCircle, FileText, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { StatsCard } from "@/components/stats-card"
-import { OrderCard } from "@/components/order-card"
+import { StatsCard } from "@/components/cards/stats-card"
+import { OrderCard } from "@/components/cards/order-card"
 import { EmptyState } from "@/components/empty-state"
 import { NotificationPanel } from "@/components/notification-panel"
 import { orders, tables, menuItems } from "@/lib/mock-data"
+import { useCreateOrderModal } from "@/context/CreateOrderModalProvider"
 
 export default function DashboardPage() {
   const [selectedFloor, setSelectedFloor] = useState("First Floor")
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [showFloorDropdown, setShowFloorDropdown] = useState(false)
+  const { openModal } = useCreateOrderModal()
 
   const currentUser = {
     name: "Richardo",
@@ -50,7 +52,7 @@ export default function DashboardPage() {
               <div className="text-3xl font-semibold">09:55:02</div>
               <div className="text-sm text-muted-foreground">Thu, 2 April 2025</div>
             </div>
-            <Button size="lg" className="h-12">
+            <Button size="lg" className="h-12 cursor-pointer" onClick={openModal}>
               <span className="text-lg mr-2">+</span>
               Create New Order
             </Button>

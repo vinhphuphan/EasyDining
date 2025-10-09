@@ -3,19 +3,13 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Cloud, Bell, CheckCircle, FileText, Clock, ChevronDown, Dice4, Calendar, Dock } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Cloud, Bell, CheckCircle, FileText, Clock, Calendar, Dock, SquareMenu } from "lucide-react"
 import { NotificationPanel } from "@/components/notification-panel"
+import UserDropdown from "@/components/header/UserDropdown"
 
 export default function Header() {
     const path = usePathname()
     const [isNotificationOpen, setIsNotificationOpen] = useState(false)
-
-    const currentUser = {
-        name: "Richardo",
-        role: "Waiter",
-        avatar: "/professional-man.jpg",
-    }
 
     const unreadNotifications = 3
 
@@ -23,7 +17,7 @@ export default function Header() {
         { href: "/dashboard", label: "Dashboard", icon: CheckCircle },
         { href: "/order", label: "Order", icon: FileText },
         { href: "/table", label: "Table", icon: Calendar },
-        { href: "/menu", label: "Menu", icon: Dock },
+        { href: "/menu", label: "Menu", icon: SquareMenu },
         { href: "/history", label: "History", icon: Clock },
     ]
 
@@ -69,16 +63,7 @@ export default function Header() {
                             {unreadNotifications > 0 && <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />}
                         </button>
 
-                        <div className="flex items-center gap-2">
-                            <Avatar className="h-9 w-9">
-                                <AvatarImage src={currentUser.avatar || "/placeholder.svg"} />
-                                <AvatarFallback>RW</AvatarFallback>
-                            </Avatar>
-                            <div className="hidden md:block text-sm">
-                                <div className="font-medium">{currentUser.name}</div>
-                                <div className="text-xs text-muted-foreground">{currentUser.role}</div>
-                            </div>
-                        </div>
+                        <UserDropdown />
                     </div>
                 </div>
             </header>

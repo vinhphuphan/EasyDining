@@ -1,7 +1,5 @@
-import Spinner from "@/components/spinner";
+import LoadingScreen from "@/components/loading-screen";
 
 export default function Loading() {
-  return (
-    <Spinner />
-  )
+  return <LoadingScreen label="Loading history" />
 }

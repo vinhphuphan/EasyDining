@@ -1,6 +1,5 @@
-import Spinner from "@/components/spinner";
+import LoadingScreen from "@/components/loading-screen";
 
 export default function Loading() {
-    // Next.js sẽ tự render file này khi route đang load (app router)
-    return <Spinner />
+  return <LoadingScreen label="Preparing login" />
 }
