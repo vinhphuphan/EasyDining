@@ -14,7 +14,7 @@ export function StatsCard({ title, value, icon: Icon, iconColor = "text-primary"
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-3xl font-semibold">{value}</p>
+          <p className="text-2xl font-semibold">{value}</p>
         </div>
         <div className={`p-3 rounded-xl bg-primary/10 ${iconColor}`}>
           <Icon className="h-6 w-6" />

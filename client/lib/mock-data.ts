@@ -39,10 +39,12 @@ export interface Table {
   capacity: number
   status: "available" | "occupied" | "reserved"
   currentOrderId?: string
+  time?: string
+  orderId?: string
 }
 
 export interface MenuItem {
-  stockLevel: string
+  stockLevel: "high" | "medium" | "low"
   id: string
   name: string
   category: string
@@ -51,7 +53,8 @@ export interface MenuItem {
   stockStatus: "available" | "not-available" | "out-of-stock"
   availableTime?: string
   description?: string
-  addOns?: { name: string; price: number }[]
+  addOns?: { name: string; price: number }[],
+  availableServing?: number
 }
 
 export interface Notification {
@@ -93,7 +96,7 @@ export const employees: Employee[] = [
     email: "eve@easydining.com",
     pin: "345678",
     role: "Waiter",
-    avatar: "/professional-woman-diverse.png",
+    avatar: "/user-03.jpg",
     shiftStart: "06:00 PM",
     shiftEnd: "10:00 PM",
   },
@@ -157,24 +160,65 @@ export const orders: Order[] = [
     createdAt: "Mon, 17 Feb 10:24 AM",
     tableNumber: "B3",
   },
+  {
+    id: "5",
+    orderNumber: "DI104",
+    customerId: "5",
+    customerName: "Eve",
+    type: "Dine In",
+    status: "in-progress",
+    progress: 30,
+    items: [
+      {
+        id: "7",
+        name: "Lemon Butter Dory",
+        quantity: 1,
+        price: 50.50,
+        addOns: [
+          { name: "Add on 1", price: 2.0 },
+          { name: "Add on 2", price: 3.0 },
+          { name: "Add on 3", price: 1.5 },
+          { name: "Add on 4", price: 2.5 }
+        ],
+        note: "Don't use onion"
+      },
+      {
+        id: "8",
+        name: "Fried Rice with Green Chili",
+        quantity: 1,
+        price: 45.99,
+        addOns: [
+          { name: "Add on 1", price: 2.0 },
+          { name: "Add on 2", price: 3.0 },
+          { name: "Add on 3", price: 1.5 },
+          { name: "Add on 4", price: 2.5 }
+        ]
+      }
+    ],
+    totalAmount: 274.42,
+    createdAt: "Mon, 17 Feb 12:24 PM",
+    tableNumber: "A11",
+  },
 ]
 
 export const tables: Table[] = [
-  { id: "1", number: "A1", floor: "First Floor", capacity: 2, status: "occupied", currentOrderId: "1" },
+  { id: "1", number: "A1", floor: "First Floor", capacity: 2, status: "occupied", currentOrderId: "1", time: "17:00 PM", orderId: "DI008" },
   { id: "2", number: "A2", floor: "First Floor", capacity: 4, status: "available" },
   { id: "3", number: "A3", floor: "First Floor", capacity: 2, status: "available" },
-  { id: "4", number: "A4", floor: "First Floor", capacity: 6, status: "occupied", currentOrderId: "3" },
+  { id: "4", number: "A4", floor: "First Floor", capacity: 6, status: "occupied", currentOrderId: "3", time: "10:32 AM", orderId: "DI002" },
   { id: "5", number: "A5", floor: "First Floor", capacity: 4, status: "available" },
   { id: "6", number: "A6", floor: "First Floor", capacity: 2, status: "available" },
   { id: "7", number: "A7", floor: "First Floor", capacity: 4, status: "available" },
   { id: "8", number: "A8", floor: "First Floor", capacity: 2, status: "available" },
   { id: "9", number: "A15", floor: "First Floor", capacity: 6, status: "available" },
-  { id: "10", number: "B1", floor: "Second Floor", capacity: 4, status: "available" },
-  { id: "11", number: "B2", floor: "Second Floor", capacity: 2, status: "available" },
-  { id: "12", number: "B3", floor: "Second Floor", capacity: 6, status: "occupied", currentOrderId: "4" },
+  { id: "10", number: "A11", floor: "First Floor", capacity: 4, status: "occupied", currentOrderId: "5", time: "12:24 PM", orderId: "DI104" },
+  { id: "11", number: "B1", floor: "Second Floor", capacity: 4, status: "available" },
+  { id: "12", number: "B2", floor: "Second Floor", capacity: 2, status: "available" },
+  { id: "13", number: "B3", floor: "Second Floor", capacity: 6, status: "occupied", currentOrderId: "4", time: "10:24 AM", orderId: "DI001" },
 ]
 
-export const menuItems: MenuItem[] = [
+// Allow authoring items without mandatory stockLevel; we'll enrich it below
+const baseMenuItems: Partial<MenuItem>[] = [
   {
     id: "1",
     name: "Butter Chicken",
@@ -188,6 +232,7 @@ export const menuItems: MenuItem[] = [
       { name: "Naan Bread", price: 2.5 },
       { name: "Extra Sauce", price: 1.5 },
     ],
+    stockLevel: "high",
   },
   {
     id: "2",
@@ -202,6 +247,7 @@ export const menuItems: MenuItem[] = [
       { name: "Grilled Vegetables", price: 5.0 },
       { name: "Mashed Potatoes", price: 4.5 },
     ],
+    stockLevel: "high",
   },
   {
     id: "3",
@@ -216,6 +262,7 @@ export const menuItems: MenuItem[] = [
       { name: "Garlic Bread", price: 3.5 },
       { name: "Parmesan", price: 2.5 },
     ],
+    stockLevel: "low",
   },
   {
     id: "4",
@@ -230,6 +277,7 @@ export const menuItems: MenuItem[] = [
       { name: "Lemon Wedges", price: 1.0 },
       { name: "Tartar Sauce", price: 2.0 },
     ],
+    stockLevel: "high",
   },
   {
     id: "5",
@@ -239,6 +287,7 @@ export const menuItems: MenuItem[] = [
     image: "https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=400&h=300&fit=crop",
     stockStatus: "not-available",
     description: "Crispy nachos topped with spicy tuna, jalapeños, and avocado.",
+    stockLevel: "medium",
   },
   {
     id: "6",
@@ -255,6 +304,7 @@ export const menuItems: MenuItem[] = [
       { name: "Tiramisu Jam", price: 10.0 },
       { name: "Mango Jam", price: 11.0 },
     ],
+    stockLevel: "high",
   },
   {
     id: "7",
@@ -264,6 +314,7 @@ export const menuItems: MenuItem[] = [
     image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop",
     stockStatus: "available",
     description: "Spicy and sour Thai soup with shrimp and mushrooms.",
+    stockLevel: "high",
   },
   {
     id: "8",
@@ -273,6 +324,7 @@ export const menuItems: MenuItem[] = [
     image: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=400&h=300&fit=crop",
     stockStatus: "available",
     description: "Traditional Japanese soup with tofu and seaweed.",
+    stockLevel: "medium",
   },
   {
     id: "9",
@@ -388,6 +440,17 @@ export const menuItems: MenuItem[] = [
     availableTime: "05:00 PM",
   },
 ]
+
+const randomStockLevel = (): MenuItem["stockLevel"] => {
+  const levels: MenuItem["stockLevel"][] = ["high", "medium", "low"]
+  return levels[Math.floor(Math.random() * levels.length)]
+}
+
+export const menuItems: MenuItem[] = baseMenuItems.map((item) => ({
+  stockLevel: (item.stockLevel as MenuItem["stockLevel"]) ?? randomStockLevel(),
+  // spread after to preserve explicit stockLevel if present and include all other fields
+  ...item,
+})) as MenuItem[]
 
 export const notifications: Notification[] = [
   {

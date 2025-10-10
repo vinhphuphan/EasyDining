@@ -49,7 +49,7 @@ export function OrderCard({ order, showActions }: OrderCardProps) {
   }
 
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow overflow-hidden">
+    <Card className="p-4 hover:shadow-md transition-shadow overflow-hidden gap-0">
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -84,7 +84,7 @@ export function OrderCard({ order, showActions }: OrderCardProps) {
             )}
             <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>{getStatusText(order.status)}</span>
           </div>
-          <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
             {order.items.length} Items
             <ArrowRight className="h-4 w-4" />
           </button>

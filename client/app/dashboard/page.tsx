@@ -41,17 +41,19 @@ export default function DashboardPage() {
         {/* Main Content */}
         <main className="flex-1 p-6">
           {/* Greeting */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-semibold mb-1">Good Morning, {currentUser.name}</h1>
-            <p className="text-muted-foreground">Give your best services for customers, happy working 😊</p>
+          <div className="flex items-center justify-between mb-4">
+            <div className="">
+              <h1 className="text-lg font-semibold mb-1">Good Morning, {currentUser.name}</h1>
+              <p className="text-muted-foreground">Give your best services for customers, happy working 😊</p>
+            </div>
+            <div className="">
+              <div className="text-xl font-semibold">09:55:02</div>
+              <div className="text-sm text-muted-foreground">Thu, 2 April 2025</div>
+            </div>
           </div>
 
           {/* Time and Create Order Button */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="text-right">
-              <div className="text-3xl font-semibold">09:55:02</div>
-              <div className="text-sm text-muted-foreground">Thu, 2 April 2025</div>
-            </div>
+          <div className="flex items-center justify-end mb-4">
             <Button size="lg" className="h-12 cursor-pointer" onClick={openModal}>
               <span className="text-lg mr-2">+</span>
               Create New Order
@@ -59,7 +61,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <StatsCard title="Total Earning" value={`$ ${totalEarning.toLocaleString()}`} icon={CreditCard} />
             <StatsCard title="In Progress" value={inProgressOrders.length} icon={Clock} iconColor="text-orange-600" />
             <StatsCard
@@ -72,9 +74,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Orders Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* In Progress */}
-            <Card className="p-6">
+            <Card className="p-6 pb-0">
               <h2 className="text-lg font-semibold mb-4">In Progress</h2>
               <div className="space-y-4">
                 {inProgressOrders.length > 0 ? (
@@ -82,7 +84,7 @@ export default function DashboardPage() {
                     {inProgressOrders.map((order) => (
                       <OrderCard key={order.id} order={order} />
                     ))}
-                    <button className="w-full py-3 text-sm text-muted-foreground hover:text-foreground flex items-center justify-center gap-2 border-t">
+                    <button className="w-full p-3 text-sm text-muted-foreground hover:text-foreground flex items-center justify-center gap-2 border-t cursor-pointer">
                       See All Order
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -99,7 +101,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Waiting for Payments */}
-            <Card className="p-6">
+            <Card className="p-6 pb-0">
               <h2 className="text-lg font-semibold mb-4">Waiting for Payments</h2>
               <div className="space-y-4">
                 {waitingPaymentOrders.length > 0 ? (
@@ -107,7 +109,7 @@ export default function DashboardPage() {
                     {waitingPaymentOrders.map((order) => (
                       <OrderCard key={order.id} order={order} />
                     ))}
-                    <button className="w-full py-3 text-sm text-muted-foreground hover:text-foreground flex items-center justify-center gap-2 border-t">
+                    <button className="w-full p-3 text-sm text-muted-foreground hover:text-foreground flex items-center justify-center gap-2 border-t">
                       See All Order
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -126,9 +128,9 @@ export default function DashboardPage() {
         </main>
 
         {/* Right Sidebar */}
-        <aside className="hidden xl:block w-80 border-l bg-card p-6 space-y-6">
-          {/* Table Available */}
-          <div>
+        <aside className="hidden xl:block w-80 bg-card pt-4 pr-2 space-y-6">
+          {/* Table Available Card */}
+          <Card className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Table Available</h3>
               <div className="relative">
@@ -158,21 +160,21 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="space-y-2 max-h-64 overflow-y-auto">
-              <div className="flex items-center justify-between text-sm text-muted-foreground pb-2 border-b">
+              <div className="flex items-center justify-between text-sm text-muted-foreground pb-2 pr-2 border-b">
                 <span>Table Number</span>
                 <span>Capacity</span>
               </div>
               {availableTables.map((table) => (
-                <div key={table.id} className="flex items-center justify-between py-2 text-sm">
+                <div key={table.id} className="flex items-center justify-between py-2 pr-2 text-sm">
                   <span className="font-medium">{table.number}</span>
                   <span className="text-muted-foreground">{table.capacity} Person</span>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
-          {/* Out of Stock */}
-          <div>
+          {/* Out of Stock Card */}
+          <Card className="p-4">
             <h3 className="font-semibold mb-4">Out of Stock</h3>
             <div className="space-y-3">
               {outOfStockItems.length > 0 ? (
@@ -211,7 +213,7 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
-          </div>
+          </Card>
         </aside>
       </div>
 
