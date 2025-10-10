@@ -75,6 +75,11 @@ export function TableDetailModal({
         return menuItem?.image || "/placeholder.svg"
     }
 
+    const getItemUnitPrice = (itemName: string, fallback: number) => {
+        const menuItem = menuItems.find(item => item.name === itemName)
+        return menuItem?.price ?? fallback
+    }
+
     const formatPrice = (price: number) => {
         return `$${price.toFixed(2)}`
     }
@@ -188,37 +193,40 @@ export function TableDetailModal({
                                 <div className="space-y-3">
                                     <h3 className="text-base font-semibold">Order Items</h3>
                                     <div className="space-y-3">
-                                        {currentOrder.items.map((item) => (
-                                            <Card key={item.id} className="p-4 bg-yellow-50 border-yellow-200 rounded-md">
-                                                <div className="flex gap-4">
-                                                    <img
-                                                        src={getItemImage(item.name)}
-                                                        alt={item.name}
-                                                        className="w-16 h-16 rounded-md object-cover"
-                                                    />
-                                                    <div className="flex-1 space-y-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-sm font-medium text-orange-600">In Progress •</span>
+                                        {currentOrder.items.map((item) => {
+                                            const unitPrice = getItemUnitPrice(item.name, item.price)
+                                            return (
+                                                <Card key={item.id} className="p-4 bg-yellow-50 border-yellow-200 rounded-md">
+                                                    <div className="flex gap-4">
+                                                        <img
+                                                            src={getItemImage(item.name)}
+                                                            alt={item.name}
+                                                            className="w-16 h-16 rounded-md object-cover"
+                                                        />
+                                                        <div className="flex-1 space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-sm font-medium text-orange-600">In Progress •</span>
+                                                            </div>
+                                                            <h4 className="font-medium">{item.name}</h4>
+                                                            {item.addOns && item.addOns.length > 0 && (
+                                                                <div className="text-sm text-muted-foreground">
+                                                                    Addition: {item.addOns.map(addon => addon.name).join(", ")}
+                                                                </div>
+                                                            )}
+                                                            {item.note && (
+                                                                <div className="text-sm text-muted-foreground">
+                                                                    Note: {item.note}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        <h4 className="font-medium">{item.name}</h4>
-                                                        {item.addOns && item.addOns.length > 0 && (
-                                                            <div className="text-sm text-muted-foreground">
-                                                                Addition: {item.addOns.map(addon => addon.name).join(", ")}
-                                                            </div>
-                                                        )}
-                                                        {item.note && (
-                                                            <div className="text-sm text-muted-foreground">
-                                                                Note: {item.note}
-                                                            </div>
-                                                        )}
+                                                        <div className="text-right">
+                                                            <div className="font-medium">{formatPrice(unitPrice)}</div>
+                                                            <div className="text-sm text-muted-foreground">x{item.quantity}</div>
+                                                        </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <div className="font-medium">{formatPrice(item.price)}</div>
-                                                        <div className="text-sm text-muted-foreground">x{item.quantity}</div>
-                                                    </div>
-                                                </div>
-                                            </Card>
-                                        ))}
+                                                </Card>
+                                            )
+                                        })}
                                     </div>
                                 </div>
 

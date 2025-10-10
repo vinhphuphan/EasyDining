@@ -76,8 +76,8 @@ export default function DashboardPage() {
           {/* Orders Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* In Progress */}
-            <Card className="p-6 pb-0">
-              <h2 className="text-lg font-semibold mb-4">In Progress</h2>
+            <Card className="p-6 pb-0 gap-4">
+              <h2 className="text-lg font-semibold">In Progress</h2>
               <div className="space-y-4">
                 {inProgressOrders.length > 0 ? (
                   <>
@@ -101,8 +101,8 @@ export default function DashboardPage() {
             </Card>
 
             {/* Waiting for Payments */}
-            <Card className="p-6 pb-0">
-              <h2 className="text-lg font-semibold mb-4">Waiting for Payments</h2>
+            <Card className="p-6 pb-0 gap-4">
+              <h2 className="text-lg font-semibold">Waiting for Payments</h2>
               <div className="space-y-4">
                 {waitingPaymentOrders.length > 0 ? (
                   <>

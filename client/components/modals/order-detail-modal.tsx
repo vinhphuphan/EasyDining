@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { PaymentModal } from "@/components/modals/payment-modal"
 import type { Order } from "@/lib/mock-data"
+import { menuItems } from "@/lib/mock-data"
 
 interface OrderDetailModalProps {
   order: Order
@@ -60,11 +61,11 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div className="bg-background rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="bg-background rounded-2xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b">
+          <div className="flex items-center justify-between px-6 py-4 border-b">
             <h2 className="text-xl font-bold">Detail Order</h2>
-            <button onClick={onClose} className="p-2 hover:bg-accent rounded-lg transition-colors">
+            <button onClick={onClose} className="p-2 hover:bg-accent rounded-lg transition-colors cursor-pointer">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -72,13 +73,11 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
             {/* Order Info */}
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">
-                  Order# {order.orderNumber} / {order.type}
-                </div>
-                <div className="text-sm text-muted-foreground">{order.createdAt}</div>
+            <div className=" flex items-center justify-between mb-4 bg-gray-100 p-2 rounded-lg">
+              <div className="text-sm text-muted-foreground mb-1">
+                Order# {order.orderNumber} / {order.type}
               </div>
+              <div className="text-sm text-muted-foreground">{order.createdAt}</div>
             </div>
 
             {/* Customer */}
@@ -107,18 +106,26 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
             {/* Items */}
             <div className="space-y-4 mb-6">
               <h3 className="font-semibold">Order Items</h3>
-              {order.items.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-4 rounded-lg border">
-                  <div className="flex-1">
-                    <div className="font-medium mb-1">{item.name}</div>
-                    <div className="text-sm text-muted-foreground">Quantity: {item.quantity}</div>
+              {order.items.map((item) => {
+                const menuItem = menuItems.find(m => m.name === item.name)
+                const image = menuItem?.image || "/placeholder.svg"
+                const unitPrice = menuItem?.price ?? item.price
+                return (
+                  <div key={item.id} className="flex items-center justify-between p-4 rounded-lg border">
+                    <div className="flex items-center gap-4 flex-1">
+                      <img src={image} alt={item.name} className="w-16 h-16 rounded-md object-cover" />
+                      <div>
+                        <div className="font-medium mb-1">{item.name}</div>
+                        <div className="text-sm text-muted-foreground">Quantity: {item.quantity}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold">${(unitPrice * item.quantity).toFixed(2)}</div>
+                      <div className="text-sm text-muted-foreground">${unitPrice.toFixed(2)} each</div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-semibold">${(item.price * item.quantity).toFixed(2)}</div>
-                    <div className="text-sm text-muted-foreground">${item.price.toFixed(2)} each</div>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Total */}

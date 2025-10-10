@@ -269,7 +269,7 @@ const baseMenuItems: Partial<MenuItem>[] = [
     name: "Lemon Butter Dory",
     category: "Chef Recommendation",
     price: 50.5,
-    image: "https://images.unsplash.com/photo-1580959375944-0b7b9e170e78?w=400&h=300&fit=crop",
+    image: "https://i.ytimg.com/vi/JhBqY1Z2Jb4/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLA9cQb65y87bVmiRxFhDB9cGAG_og",
     stockStatus: "available",
     description: "Zesty lemon butter sauce enhances the dory's rich flavor.",
     addOns: [

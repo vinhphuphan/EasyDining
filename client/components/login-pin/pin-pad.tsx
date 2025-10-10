@@ -4,12 +4,17 @@
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
 
+import { useState } from "react"
+
 interface PinPadProps {
-  onNumberClick: (num: string) => void
-  onDelete: () => void
+  onNumberClick?: (num: string) => void
+  onDelete?: () => void
+  onComplete?: (pin: string) => void
+  maxLength?: number
 }
 
-export function PinPad({ onNumberClick, onDelete }: PinPadProps) {
+export function PinPad({ onNumberClick, onDelete, onComplete, maxLength = 6 }: PinPadProps) {
+  const [value, setValue] = useState("")
   const numbers = [
     ["1", "2", "3"],
     ["4", "5", "6"],
@@ -30,7 +35,16 @@ export function PinPad({ onNumberClick, onDelete }: PinPadProps) {
                     key={num}
                     variant="ghost"
                     size="lg"
-                    onClick={() => onNumberClick(num)}
+                    onClick={() => {
+                      // call legacy handler if provided
+                      onNumberClick?.(num)
+
+                      if (onComplete) {
+                        const next = (value + num).slice(0, maxLength)
+                        setValue(next)
+                        if (next.length >= maxLength) onComplete(next)
+                      }
+                    }}
                     className="h-12 text-2xl font-medium hover:bg-primary/20 cursor-pointer"
                   >
                     {num}
@@ -49,12 +63,25 @@ export function PinPad({ onNumberClick, onDelete }: PinPadProps) {
                 key={zero}
                 variant="ghost"
                 size="lg"
-                onClick={() => onNumberClick(zero)}
+                onClick={() => {
+                  onNumberClick?.(zero)
+                  if (onComplete) {
+                    const next = (value + zero).slice(0, maxLength)
+                    setValue(next)
+                    if (next.length >= maxLength) onComplete(next)
+                  }
+                }}
                 className="h-12 text-2xl font-medium hover:bg-primary/20 cursor-pointer"
               >
                 {zero}
               </Button>
-              <Button variant="ghost" size="lg" onClick={onDelete} className="h-12 hover:bg-primary/20 cursor-pointer">
+              <Button variant="ghost" size="lg" onClick={() => {
+                onDelete?.()
+                if (onComplete) {
+                  const next = value.slice(0, -1)
+                  setValue(next)
+                }
+              }} className="h-12 hover:bg-primary/20 cursor-pointer">
                 <X className="h-6 w-6" />
               </Button>
             </div>
