@@ -44,7 +44,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="">
               <h1 className="text-lg font-semibold mb-1">Good Morning, {currentUser.name}</h1>
-              <p className="text-muted-foreground">Give your best services for customers, happy working 😊</p>
+              <p className="hidden md:block text-muted-foreground">Give your best services for customers, happy working 😊</p>
             </div>
             <div className="">
               <div className="text-xl font-semibold">09:55:02</div>
