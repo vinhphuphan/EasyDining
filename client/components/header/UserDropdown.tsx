@@ -82,13 +82,9 @@ export default function UserDropdown() {
                 <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={goProfile} className="cursor-pointer">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        <span>View profile</span>
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsProfileOpen(true)} className="cursor-pointer">
                         <Pencil className="mr-2 h-4 w-4" />
-                        <span>Edit profile</span>
+                        <span>P rofile</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={goSettings} className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />

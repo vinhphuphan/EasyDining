@@ -5,7 +5,7 @@ import { GeistMono } from 'geist/font/mono';
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
-import Header from "@/components/header/header"
+import Header from "@/components/header/Header"
 import { CreateOrderModalProvider } from "@/context/CreateOrderModalProvider"
 import CreateOrderModalRenderer from "@/components/modals/create-order-modal-renderer"
 import { Toaster } from "sonner";
@@ -25,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
-      <body className={`font-sans`}>
+    <html lang="en" className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+      <body>
         <CreateOrderModalProvider>
           <Header />
           <Suspense fallback={null}>{children}</Suspense>
