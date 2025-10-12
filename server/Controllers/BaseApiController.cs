@@ -95,7 +95,5 @@ namespace server.Controllers
 
             return query;
         }
-
-
     }
 }

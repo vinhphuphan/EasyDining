@@ -7,7 +7,5 @@ namespace server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TablesController(AppDbContext context) : BaseApiController<Table>(context)
-    {
-    }
+    public class TablesController(AppDbContext context) : BaseApiController<Table>(context) { }
 }

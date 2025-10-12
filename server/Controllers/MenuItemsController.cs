@@ -7,8 +7,5 @@ namespace server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MenuItemsController(AppDbContext context) : BaseApiController<MenuItem>(context)
-    {
-
-    }
+    public class MenuItemsController(AppDbContext context) : BaseApiController<MenuItem>(context) { }
 }

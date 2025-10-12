@@ -11,7 +11,7 @@ public class Order : BaseEntity
     public Table? Table { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<OrderItem>? OrderItems { get; set; }
-    // Payment info (tạm thời lưu đơn giản)
+    // Payment info 
     public string PaymentStatus { get; set; } = "Unpaid"; // Paid / Unpaid / Pending
     public decimal TotalAmount { get; set; }
 }

@@ -49,8 +49,6 @@ public class DbInitializer
             context.SaveChanges();
         }
 
-
-
         // ===== Employees =====
         if (!context.Employees.Any())
         {
@@ -63,8 +61,6 @@ public class DbInitializer
             context.Employees.AddRange(employees);
             context.SaveChanges();
         }
-
-
 
         // ===== Tables =====
         if (!context.Tables.Any())
