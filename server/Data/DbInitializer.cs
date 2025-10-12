@@ -84,5 +84,26 @@ public class DbInitializer
             context.Tables.AddRange(tables);
             context.SaveChanges();
         }
+
+        // // ===== Orders =====
+        // if (!context.Orders.Any())
+        // {
+        //     var order1 = new Order { OrderNumber = "DI008", CustomerName = "Daniel", Type = "Dine In", Status = "in-progress", Progress = 10, TotalAmount = 35.96m, CreatedAt = DateTime.Now };
+        //     var order2 = new Order { OrderNumber = "TA001", CustomerName = "Vlona", Type = "Take Away", Status = "in-progress", Progress = 60, TotalAmount = 27.98m, CreatedAt = DateTime.Now };
+
+        //     context.Orders.AddRange(order1, order2);
+        //     context.SaveChanges(); // save first to generate IDs
+
+        //     var orderItems = new List<OrderItem>
+        //     {
+        //         new() { OrderId = order1.Id, MenuItemId = 1, Quantity = 2, Price = 12.99m },
+        //         new() { OrderId = order1.Id, MenuItemId = 2, Quantity = 2, Price = 4.99m },
+        //         new() { OrderId = order2.Id, MenuItemId = 3, Quantity = 1, Price = 18.99m }
+        //     };
+
+        //     context.OrderItems.AddRange(orderItems);
+        //     context.SaveChanges();
+        // }
+
     }
 }
