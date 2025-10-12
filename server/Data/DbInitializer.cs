@@ -19,61 +19,74 @@ public class DbInitializer
         // Tạo hoặc update database
         context.Database.Migrate();
 
-        // Nếu đã có dữ liệu rồi thì bỏ qua
-        if (context.MenuItems.Any()) return;
-
-        var menuItems = new List<MenuItem>
+        // ===== MenuItems =====
+        if (!context.MenuItems.Any())
         {
-            // ==== BBQ COMBO ====
-            new() { Name = "Premium Wagyu & Pork Family Set 1000g", Category = "BBQ Combo", Price = 175.00m, Description = "8 Side Dishes, sauces, soup, lettuce (4–5 ppl)", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745413184956tb_%EB%B9%85%EC%85%8B.png?alt=media&token=920d5206-8291-443e-9027-5c99f8bf364a" },
-            new() { Name = "Premium Wagyu & Pork Couple Set 600g", Category = "BBQ Combo", Price = 135.00m, Description = "8 Side Dishes, sauces, soup, lettuce (2–3 ppl)" , ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745413155298tb_%EC%99%80%EA%B7%9C%ED%8F%AD%EC%83%9B.png?alt=media&token=40a58179-8b6d-458b-b265-c0a7feb16575"},
-            new() { Name = "Marinated Beef, Pork & Chicken Set 700g", Category = "BBQ Combo", Price = 130.00m, Description = "8 Side Dishes, sauces, soup, lettuce (2–3 ppl)", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745413002789tb_%EC%96%91%EB%85%90%20%EC%85%8B.png?alt=media&token=ac6dfc39-8d70-4107-895c-1ab38a9f8bcd" },
-            new() { Name = "Premium Wagyu Set 500g", Category = "BBQ Combo", Price = 125.00m, Description = "8 Side Dishes, sauces, soup, lettuce (2–3 ppl)", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745412986101tb_%EC%99%80%EA%B7%9C%202%EC%9D%B8.png?alt=media&token=06bf702a-9200-423b-acc1-52ba5d7794ab" },
-
-            // ==== BBQ ====
-            new() { Name = "Wagyu Chuck Tail Flap 160g", Category = "BBQ", Price = 46.00m, Description = "Served with 8 Side Dishes, dipping sauce, lettuce", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745412690398tb_%EC%82%B4%EC%B9%98.png?alt=media&token=dc1f2e49-24d3-4c51-a1d6-4d50d6326a4b" },
-            new() { Name = "Wagyu Oyster Blade 160g", Category = "BBQ", Price = 45.00m, Description = "Served with 8 Side Dishes, dipping sauce, lettuce", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745412674504tb_%EB%B6%80%EC%B1%84.png?alt=media&token=ea57e8f9-cab5-4f28-820a-2f67f2be9473" },
-            new() { Name = "Wagyu Chuck Rib Meat 160g", Category = "BBQ", Price = 45.00m, Description = "Served with 8 Side Dishes, dipping sauce, lettuce", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745412519132tb_%EB%8A%91%EA%B0%84.png?alt=media&token=2f1e7530-347f-44bc-bd60-ddfb7b898663" },
-            new() { Name = "Marinated Pork Neck 200g", Category = "BBQ", Price = 28.00m, Description = "Served with 8 Side Dishes, dipping sauce, lettuce", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745412519132tb_%EB%8A%91%EA%B0%84.png?alt=media&token=2f1e7530-347f-44bc-bd60-ddfb7b898663" },
-
-            // ==== SOUP ====
-            new() { Name = "Beef Rib Soup (Galbitang)", Category = "Soup", Price = 28.00m, Description = "Served with rice, kimchi, clear noodles", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745412005765tb_%EA%B0%88%EB%B9%84%ED%83%95.png?alt=media&token=a33bb57c-e022-4a89-9386-58f83a2f217d" },
-            new() { Name = "Spicy Beef Soup (Yukgaejang)", Category = "Soup", Price = 24.00m, Description = "Served with rice, kimchi, clear noodles", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745411953691tb_%EC%9C%A1%EA%B3%84%EC%9E%A5.png?alt=media&token=fcc28a86-758f-42c5-96b7-006f4f999765" },
-            new() { Name = "Kimchi Soup with Pork", Category = "Soup", Price = 24.00m, Description = "Served with rice, kimchi, clear noodles", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745411906111tb_%EA%B9%80%EC%B9%98%EC%B0%8C%EA%B0%9C.png?alt=media&token=3cdbaf9d-2397-49ff-8f5b-b26a263bd03a" },
-            new() { Name = "Soft Tofu Soup", Category = "Soup", Price = 24.00m, Description = "Served with rice, kimchi, clear noodles", ImageUrl="https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745411906111tb_%EA%B9%80%EC%B9%98%EC%B0%8C%EA%B0%9C.png?alt=media&token=3cdbaf9d-2397-49ff-8f5b-b26a263bd03a" },
-
-            // ==== Hotpot ====
-            new() {
-                    Name = "Braised Short Rib",
-                    Price = 68.00m,
-                    Description = "Tender short ribs braised in a savory-sweet soy-based sauce. Comes with 2 servings of rice.",
-                    ImageUrl = "https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745412971608tb_%EA%B0%88%EB%B9%84%EC%B0%9C.png?alt=media&token=68de550e-8619-48c5-9e23-f24ff5ec17cb",
-                    Category = "Hotpot"
-                },
-            new() {
-                    Name = "Beef & Mushroom Stew",
-                    Price = 50.00m,
-                    Description = "Beef and mushrooms simmered in rich broth. Comes with 2 servings of rice.",
-                    ImageUrl = "https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745407194244tb_1668817126327t_h_%EB%B6%88%EA%B3%A0%EA%B8%B0%EB%B2%84%EC%84%AF%EC%A0%84%EA%B3%A8.jpg?alt=media&token=b1133df0-931e-4982-871d-9c7a587b3000",
-                    Category = "Hotpot"
-                },
-                new() {
-                    Name = "Braised Spicy Pork",
-                    Price = 50.00m,
-                    Description = "Spicy braised pork stew with rich Korean seasoning. Comes with 2 servings of rice.",
-                    ImageUrl = "https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745407208617tb_1668816821242t_h_%EC%A7%9C%EA%B8%80%EC%9D%B4.jpg?alt=media&token=5203cb35-a7c6-4655-abb5-374cc74e9c67",
-                    Category = "Hotpot"
-                },
-                new() {
-                    Name = "Spicy Pork & Kimchi Stew",
-                    Price = 50.00m,
-                    Description = "Classic spicy stew with pork and kimchi. Comes with 2 servings of rice.",
-                    ImageUrl = "https://firebasestorage.googleapis.com/v0/b/order-now-aus.appspot.com/o/menu%2F1745407219123tb_1668816649332t_h_%EB%8F%BC%EC%A7%80%EA%B9%80%EC%B9%98%EC%B0%9C.jpg?alt=media&token=18ad35cf-3fe3-4006-b9b2-30235a094906",
-                    Category = "Hotpot"
-                }
+            var menuItems = new List<MenuItem>
+        {
+            new() { Name = "Butter Chicken", Category = "Chef Recommendation", Price = 12.64m, Description = "Creamy butter chicken with spices, served with rice.", ImageUrl = "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&h=300&fit=crop" },
+            new() { Name = "Wagyu Steak", Category = "Chef Recommendation", Price = 31.17m, Description = "Savor our Wagyu Steak, rich in flavor and buttery texture.", ImageUrl = "https://images.unsplash.com/photo-1558030006-450675393462?w=400&h=300&fit=crop" },
+            new() { Name = "Pasta Bolognese", Category = "Chef Recommendation", Price = 23.5m, Description = "Delicious Pasta Bolognese made with fresh tomatoes, beef, and herbs.", ImageUrl = "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=300&fit=crop" },
+            new() { Name = "Lemon Butter Dory", Category = "Chef Recommendation", Price = 50.5m, Description = "Zesty lemon butter sauce enhances the dory's rich flavor.", ImageUrl = "https://i.ytimg.com/vi/JhBqY1Z2Jb4/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLA9cQb65y87bVmiRxFhDB9cGAG_og" },
+            new() { Name = "Spicy Tuna Nachos", Category = "Chef Recommendation", Price = 18.99m, Description = "Crispy nachos topped with spicy tuna, jalapeños, and avocado.", ImageUrl = "https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=400&h=300&fit=crop" },
+            new() { Name = "Banana Wrap", Category = "Chef Recommendation", Price = 25.0m, Description = "Delicious banana wrapped in a soft tortilla with honey.", ImageUrl = "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=400&h=300&fit=crop" },
+            new() { Name = "Tom Yum Soup", Category = "Soup", Price = 8.99m, Description = "Spicy and sour Thai soup with shrimp and mushrooms.", ImageUrl = "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop" },
+            new() { Name = "Miso Soup", Category = "Soup", Price = 5.99m, Description = "Traditional Japanese soup with tofu and seaweed.", ImageUrl = "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=400&h=300&fit=crop" },
+            new() { Name = "Pad Thai", Category = "Noodle", Price = 14.99m, Description = "Classic Thai stir-fried noodles with peanuts and lime.", ImageUrl = "https://images.unsplash.com/photo-1559314809-0d155014e29e?w=400&h=300&fit=crop" },
+            new() { Name = "Ramen", Category = "Noodle", Price = 16.99m, Description = "Japanese noodle soup with pork, egg, and vegetables.", ImageUrl = "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=300&fit=crop" },
+            new() { Name = "Fried Rice with Green Chili", Category = "Rice", Price = 45.99m, Description = "Spicy fried rice with green chili and vegetables.", ImageUrl = "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop" },
+            new() { Name = "Chicken Biryani", Category = "Rice", Price = 18.99m, Description = "Aromatic rice dish with spiced chicken and herbs.", ImageUrl = "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=300&fit=crop" },
+            new() { Name = "Chocolate Lava Cake", Category = "Dessert", Price = 9.99m, Description = "Warm chocolate cake with a molten center.", ImageUrl = "https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=400&h=300&fit=crop" },
+            new() { Name = "Tiramisu", Category = "Dessert", Price = 11.99m, Description = "Classic Italian dessert with coffee and mascarpone.", ImageUrl = "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&h=300&fit=crop" },
+            new() { Name = "Mango Smoothie", Category = "Drink", Price = 6.99m, Description = "Refreshing mango smoothie with ice.", ImageUrl = "https://images.unsplash.com/photo-1546173159-315724a31696?w=400&h=300&fit=crop" },
+            new() { Name = "Jar Fruit Iced Tea", Category = "Drink", Price = 8.0m, Description = "Refreshing iced tea with mixed fruits.", ImageUrl = "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=300&fit=crop" },
+            new() { Name = "Hawaiian Chicken Skewers", Category = "Main Course", Price = 16.99m, Description = "", ImageUrl = "/hawaiian-chicken-skewers.jpg" },
+            new() { Name = "BBQ Beef Ribs", Category = "Main Course", Price = 24.99m, Description = "", ImageUrl = "/bbq-beef-ribs.jpg" },
+            new() { Name = "Veggie Supreme Pizza", Category = "Pizza", Price = 18.99m, Description = "", ImageUrl = "/veggie-supreme-pizza.jpg" },
+            new() { Name = "Tacos With Chicken Grilled", Category = "Mexican", Price = 14.99m, Description = "", ImageUrl = "/chicken-tacos.png" },
         };
+            context.MenuItems.AddRange(menuItems);
+            context.SaveChanges();
+        }
 
-        context.MenuItems.AddRange(menuItems);
-        context.SaveChanges();
+
+
+        // ===== Employees =====
+        if (!context.Employees.Any())
+        {
+            var employees = new List<Employee>
+        {
+            new() { Id = 1, Name = "Richardo Wilson", Email = "richardo.wilson@gmail.com", PinCode = "123456", Role = "Waiter", Avatar = "/professional-man.jpg", ShiftStart =TimeSpan.Parse("10:00:00"), ShiftEnd = TimeSpan.Parse("14:00:00") },
+            new() { Id = 2, Name = "Orlando", Email = "orlando@easydining.com", PinCode = "234567", Role = "Waiter", Avatar = "/young-waiter.jpg", ShiftStart = TimeSpan.Parse("14:00:00"), ShiftEnd = TimeSpan.Parse("18:00:00") },
+            new() { Id = 3, Name = "Eve", Email = "eve@easydining.com", PinCode = "345678", Role = "Waiter", Avatar = "/user-03.jpg", ShiftStart = TimeSpan.Parse("18:00:00"), ShiftEnd = TimeSpan.Parse("22:00:00") }
+        };
+            context.Employees.AddRange(employees);
+            context.SaveChanges();
+        }
+
+
+
+        // ===== Tables =====
+        if (!context.Tables.Any())
+        {
+            var tables = new List<Table>
+        {
+            new() { TableNo = 1, Status = "occupied", Seats = 2 },
+            new() { TableNo = 2, Status = "available", Seats = 4 },
+            new() { TableNo = 3, Status = "available", Seats = 2 },
+            new() { TableNo = 4, Status = "occupied", Seats = 6 },
+            new() { TableNo = 5, Status = "available", Seats = 4 },
+            new() { TableNo = 6, Status = "available", Seats = 2 },
+            new() { TableNo = 7, Status = "available", Seats = 4 },
+            new() { TableNo = 8, Status = "available", Seats = 2 },
+            new() { TableNo = 15, Status = "available", Seats = 6 },
+            new() { TableNo = 11, Status = "occupied", Seats = 4 },
+            new() { TableNo = 101, Status = "available", Seats = 4 }, // B1
+            new() { TableNo = 102, Status = "available", Seats = 2 }, // B2
+            new() { TableNo = 103, Status = "occupied", Seats = 6 }   // B3
+        };
+            context.Tables.AddRange(tables);
+            context.SaveChanges();
+        }
     }
 }

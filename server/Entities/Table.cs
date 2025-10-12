@@ -1,8 +1,7 @@
 namespace server.Entities;
 
-public class Table
+public class Table : BaseEntity
 {
-    public int Id { get; set; }
     public int TableNo { get; set; } // Ex: 12
     public string Status { get; set; } = "Available"; // Available, Occupied, Reserved
     public int Seats { get; set; }

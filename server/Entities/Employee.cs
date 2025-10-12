@@ -1,12 +1,12 @@
 namespace server.Entities;
 
-public class Employee
+public class Employee : BaseEntity
 {
-    public int Id { get; set; }
-    public string FullName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
     public required string Email { get; set; } = string.Empty;
-    public string PictureUrl { get; set; } = string.Empty;
-
+    public string Avatar { get; set; } = string.Empty;
+    public string Role { get; set; } = "";
+    
     // PIN to sign in (6 digits)
     public required string PinCode { get; set; } = string.Empty;
     // Shift

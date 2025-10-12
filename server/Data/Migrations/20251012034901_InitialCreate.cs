@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace server.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,9 +17,10 @@ namespace server.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    FullName = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
-                    PictureUrl = table.Column<string>(type: "TEXT", nullable: false),
+                    Avatar = table.Column<string>(type: "TEXT", nullable: false),
+                    Role = table.Column<string>(type: "TEXT", nullable: false),
                     PinCode = table.Column<string>(type: "TEXT", nullable: false),
                     ShiftStart = table.Column<TimeSpan>(type: "TEXT", nullable: false),
                     ShiftEnd = table.Column<TimeSpan>(type: "TEXT", nullable: false)
@@ -68,22 +69,19 @@ namespace server.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TableId = table.Column<int>(type: "INTEGER", nullable: false),
-                    EmployeeId = table.Column<int>(type: "INTEGER", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CustomerContact = table.Column<string>(type: "TEXT", nullable: false),
+                    OrderNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    CustomerName = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
                     Status = table.Column<string>(type: "TEXT", nullable: false),
+                    Progress = table.Column<int>(type: "INTEGER", nullable: true),
+                    TableId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     PaymentStatus = table.Column<string>(type: "TEXT", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "TEXT", nullable: false)
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Orders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Orders_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Orders_Tables_TableId",
                         column: x => x.TableId,
@@ -131,11 +129,6 @@ namespace server.Data.Migrations
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_EmployeeId",
-                table: "Orders",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Orders_TableId",
                 table: "Orders",
                 column: "TableId");
@@ -145,6 +138,9 @@ namespace server.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Employees");
+
+            migrationBuilder.DropTable(
                 name: "OrderItems");
 
             migrationBuilder.DropTable(
@@ -152,9 +148,6 @@ namespace server.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Orders");
-
-            migrationBuilder.DropTable(
-                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "Tables");

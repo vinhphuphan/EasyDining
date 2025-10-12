@@ -11,8 +11,8 @@ using server.Data;
 namespace server.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251004105003_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20251012034901_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,19 +26,23 @@ namespace server.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Avatar")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PictureUrl")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PinCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -92,16 +96,20 @@ namespace server.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CustomerContact")
+                    b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("EmployeeId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("Progress")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -111,11 +119,13 @@ namespace server.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("TableId");
 
@@ -172,17 +182,11 @@ namespace server.Data.Migrations
 
             modelBuilder.Entity("server.Entities.Order", b =>
                 {
-                    b.HasOne("server.Entities.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId");
-
                     b.HasOne("server.Entities.Table", "Table")
                         .WithMany("Orders")
                         .HasForeignKey("TableId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Employee");
 
                     b.Navigation("Table");
                 });
