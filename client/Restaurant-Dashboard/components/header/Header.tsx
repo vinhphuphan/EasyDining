@@ -23,7 +23,9 @@ export default function Header() {
     ]
 
     // Hide header on login page
-    if (path?.startsWith("/login")) return null
+    if (path?.startsWith("/login",)) return null
+    if (path?.startsWith("/qr-code",)) return null
+    if (path?.startsWith("/place-order",)) return null
 
     return (
         <>
@@ -44,11 +46,10 @@ export default function Header() {
                                     <Link
                                         key={t.href}
                                         href={t.href}
-                                        className={`px-4 py-2 rounded-lg text-sm flex items-center gap-2 ${
-                                            active
-                                                ? "bg-primary/10 text-primary font-medium"
-                                                : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                                        }`}
+                                        className={`px-4 py-2 rounded-lg text-sm flex items-center gap-2 ${active
+                                            ? "bg-primary/10 text-primary font-medium"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                                            }`}
                                     >
                                         <t.icon className="h-4 w-4" />
                                         {t.label}

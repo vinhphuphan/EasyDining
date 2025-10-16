@@ -8,10 +8,10 @@ using server.Data;
 
 #nullable disable
 
-namespace server.Data.Migrations
+namespace server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251012105925_Init")]
+    [Migration("20251014110945_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -104,18 +104,14 @@ namespace server.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("Progress")
+                    b.Property<int>("Progress")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("TableId")
+                    b.Property<int?>("TableId")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("TotalAmount")
@@ -138,8 +134,12 @@ namespace server.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("MenuItemId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("INTEGER");
@@ -152,8 +152,6 @@ namespace server.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MenuItemId");
-
                     b.HasIndex("OrderId");
 
                     b.ToTable("OrderItems");
@@ -165,14 +163,18 @@ namespace server.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Seats")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Status")
+                    b.Property<string>("HashCode")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("TableNo")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Seats")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -184,35 +186,25 @@ namespace server.Data.Migrations
                 {
                     b.HasOne("server.Entities.Table", "Table")
                         .WithMany("Orders")
-                        .HasForeignKey("TableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TableId");
 
                     b.Navigation("Table");
                 });
 
             modelBuilder.Entity("server.Entities.OrderItem", b =>
                 {
-                    b.HasOne("server.Entities.MenuItem", "MenuItem")
-                        .WithMany()
-                        .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("server.Entities.Order", "Order")
-                        .WithMany("OrderItems")
+                        .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("MenuItem");
 
                     b.Navigation("Order");
                 });
 
             modelBuilder.Entity("server.Entities.Order", b =>
                 {
-                    b.Navigation("OrderItems");
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("server.Entities.Table", b =>

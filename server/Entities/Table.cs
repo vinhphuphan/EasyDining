@@ -2,10 +2,18 @@ namespace server.Entities;
 
 public class Table : BaseEntity
 {
-    public int TableNo { get; set; } // Ex: 12
-    public string Status { get; set; } = "Available"; // Available, Occupied, Reserved
+    public string Name { get; set; } = string.Empty; // Ex: A12, B1, B2, etc.
+    public TableStatus Status { get; set; } = TableStatus.Available; // Available, Occupied, Reserved
+    public string HashCode { get; private set; } = Guid.NewGuid().ToString("N");
     public int Seats { get; set; }
 
     // One-to-many: a Table can have many orders
     public ICollection<Order>? Orders { get; set; }
+}
+
+public enum TableStatus
+{
+    Available,
+    Occupied,
+    Reserved
 }

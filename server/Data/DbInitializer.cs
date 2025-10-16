@@ -54,9 +54,9 @@ public class DbInitializer
         {
             var employees = new List<Employee>
         {
-            new() { Id = 1, Name = "Richardo Wilson", Email = "richardo.wilson@gmail.com", PinCode = "123456", Role = "Waiter", Avatar = "/professional-man.jpg", ShiftStart =TimeSpan.Parse("10:00:00"), ShiftEnd = TimeSpan.Parse("14:00:00") },
-            new() { Id = 2, Name = "Orlando", Email = "orlando@easydining.com", PinCode = "234567", Role = "Waiter", Avatar = "/young-waiter.jpg", ShiftStart = TimeSpan.Parse("14:00:00"), ShiftEnd = TimeSpan.Parse("18:00:00") },
-            new() { Id = 3, Name = "Eve", Email = "eve@easydining.com", PinCode = "345678", Role = "Waiter", Avatar = "/user-03.jpg", ShiftStart = TimeSpan.Parse("18:00:00"), ShiftEnd = TimeSpan.Parse("22:00:00") }
+            new() { Name = "Richardo Wilson", Email = "richardo.wilson@gmail.com", PinCode = "123456", Role = "Waiter", Avatar = "/professional-man.jpg", ShiftStart =TimeSpan.Parse("10:00:00"), ShiftEnd = TimeSpan.Parse("14:00:00") },
+            new() { Name = "Orlando", Email = "orlando@easydining.com", PinCode = "234567", Role = "Waiter", Avatar = "/young-waiter.jpg", ShiftStart = TimeSpan.Parse("14:00:00"), ShiftEnd = TimeSpan.Parse("18:00:00") },
+            new() { Name = "Eve", Email = "eve@easydining.com", PinCode = "345678", Role = "Waiter", Avatar = "/user-03.jpg", ShiftStart = TimeSpan.Parse("18:00:00"), ShiftEnd = TimeSpan.Parse("22:00:00") }
         };
             context.Employees.AddRange(employees);
             context.SaveChanges();
@@ -67,43 +67,22 @@ public class DbInitializer
         {
             var tables = new List<Table>
         {
-            new() { TableNo = 1, Status = "occupied", Seats = 2 },
-            new() { TableNo = 2, Status = "available", Seats = 4 },
-            new() { TableNo = 3, Status = "available", Seats = 2 },
-            new() { TableNo = 4, Status = "occupied", Seats = 6 },
-            new() { TableNo = 5, Status = "available", Seats = 4 },
-            new() { TableNo = 6, Status = "available", Seats = 2 },
-            new() { TableNo = 7, Status = "available", Seats = 4 },
-            new() { TableNo = 8, Status = "available", Seats = 2 },
-            new() { TableNo = 15, Status = "available", Seats = 6 },
-            new() { TableNo = 11, Status = "occupied", Seats = 4 },
-            new() { TableNo = 101, Status = "available", Seats = 4 }, // B1
-            new() { TableNo = 102, Status = "available", Seats = 2 }, // B2
-            new() { TableNo = 103, Status = "occupied", Seats = 6 }   // B3
+            new() { Name = "A1", Status = TableStatus.Occupied, Seats = 2 },
+            new() { Name = "A2", Status = TableStatus.Available, Seats = 4 },
+            new() { Name = "A3", Status = TableStatus.Available, Seats = 2 },
+            new() { Name = "A4", Status = TableStatus.Occupied, Seats = 6 },
+            new() { Name = "A5", Status = TableStatus.Available, Seats = 4 },
+            new() { Name = "A6", Status = TableStatus.Available, Seats = 2 },
+            new() { Name = "A7", Status = TableStatus.Available, Seats = 4 },
+            new() { Name = "A8", Status = TableStatus.Available, Seats = 2 },
+            new() { Name = "A15", Status = TableStatus.Available, Seats = 6 },
+            new() { Name = "A11", Status = TableStatus.Occupied, Seats = 4 },
+            new() { Name = "B1", Status = TableStatus.Available, Seats = 4 }, // B1
+            new() { Name = "B2", Status = TableStatus.Available, Seats = 2 }, // B2
+            new() { Name = "B3", Status = TableStatus.Occupied, Seats = 6 }   // B3
         };
             context.Tables.AddRange(tables);
             context.SaveChanges();
         }
-
-        // // ===== Orders =====
-        // if (!context.Orders.Any())
-        // {
-        //     var order1 = new Order { OrderNumber = "DI008", CustomerName = "Daniel", Type = "Dine In", Status = "in-progress", Progress = 10, TotalAmount = 35.96m, CreatedAt = DateTime.Now };
-        //     var order2 = new Order { OrderNumber = "TA001", CustomerName = "Vlona", Type = "Take Away", Status = "in-progress", Progress = 60, TotalAmount = 27.98m, CreatedAt = DateTime.Now };
-
-        //     context.Orders.AddRange(order1, order2);
-        //     context.SaveChanges(); // save first to generate IDs
-
-        //     var orderItems = new List<OrderItem>
-        //     {
-        //         new() { OrderId = order1.Id, MenuItemId = 1, Quantity = 2, Price = 12.99m },
-        //         new() { OrderId = order1.Id, MenuItemId = 2, Quantity = 2, Price = 4.99m },
-        //         new() { OrderId = order2.Id, MenuItemId = 3, Quantity = 1, Price = 18.99m }
-        //     };
-
-        //     context.OrderItems.AddRange(orderItems);
-        //     context.SaveChanges();
-        // }
-
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace server.Data.Migrations
+namespace server.Migrations
 {
     /// <inheritdoc />
     public partial class Init : Migration
@@ -54,8 +54,9 @@ namespace server.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TableNo = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    HashCode = table.Column<string>(type: "TEXT", nullable: false),
                     Seats = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -73,11 +74,10 @@ namespace server.Data.Migrations
                     CustomerName = table.Column<string>(type: "TEXT", nullable: false),
                     Type = table.Column<string>(type: "TEXT", nullable: false),
                     Status = table.Column<string>(type: "TEXT", nullable: false),
-                    Progress = table.Column<int>(type: "INTEGER", nullable: true),
-                    TableId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Progress = table.Column<int>(type: "INTEGER", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    PaymentStatus = table.Column<string>(type: "TEXT", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    TableId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -86,8 +86,7 @@ namespace server.Data.Migrations
                         name: "FK_Orders_Tables_TableId",
                         column: x => x.TableId,
                         principalTable: "Tables",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -96,20 +95,15 @@ namespace server.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    OrderId = table.Column<int>(type: "INTEGER", nullable: false),
-                    MenuItemId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
                     Quantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Note = table.Column<string>(type: "TEXT", nullable: true),
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OrderItems", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_OrderItems_MenuItems_MenuItemId",
-                        column: x => x.MenuItemId,
-                        principalTable: "MenuItems",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_OrderItems_Orders_OrderId",
                         column: x => x.OrderId,
@@ -117,11 +111,6 @@ namespace server.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderItems_MenuItemId",
-                table: "OrderItems",
-                column: "MenuItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId",
@@ -141,10 +130,10 @@ namespace server.Data.Migrations
                 name: "Employees");
 
             migrationBuilder.DropTable(
-                name: "OrderItems");
+                name: "MenuItems");
 
             migrationBuilder.DropTable(
-                name: "MenuItems");
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
                 name: "Orders");
