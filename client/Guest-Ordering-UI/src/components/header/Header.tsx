@@ -1,11 +1,5 @@
 "use client"
-
-// ============================================
-// HEADER COMPONENT
-// ============================================
-// Top navigation bar with logo, hours, and cart button
-
-import { Cloud, ShoppingCart, Utensils } from "lucide-react"
+import { Cloud, ShoppingCart } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
 import { Badge } from "@/components/ui/badge"
 import { useNavigate } from "react-router-dom"
@@ -20,7 +14,7 @@ export const Header = ({ onCartClick }: HeaderProps) => {
   const totalItems = getTotalItems()
 
   return (
-    <header className="sticky top-0 z-50 bg-black text-white border-b border-gray-800">
+    <header className="sticky top-0 z-50 bg-black text-white">
       <div className="container mx-auto px-4 py-4">
         {/* Top row: Logo centered, cart on right */}
         <div className="grid grid-cols-3 items-center">
@@ -35,7 +29,7 @@ export const Header = ({ onCartClick }: HeaderProps) => {
               </div>
               <h1 className="text-xl font-bold">EASYDINING</h1>
             </div>
-            <p className="text-xs text-gray-400">Restaurant</p>
+
           </div>
 
           {/* Right: Cart button */}
@@ -54,26 +48,30 @@ export const Header = ({ onCartClick }: HeaderProps) => {
             </button>
           </div>
         </div>
-
-        {/* Operating hours */}
-        <div className="mt-3 flex items-center justify-center gap-2 text-sm">
-          <span className="text-primary font-semibold">Open later</span>
-          <span className="text-gray-400">| AM 11:00~PM 10:00</span>
-        </div>
-
-        {/* Table badge */}
-        <div className="mt-3 flex justify-center">
-          <Badge className="bg-primary text-white border-0 px-4 py-1">Table. 1</Badge>
-        </div>
-
-        {/* Announcement banner */}
-        <div className="mt-4 p-3 bg-gray-800 rounded-lg text-sm text-gray-300">
-          <p className="text-center">
-            🎉 Self-serve Side bar OPEN 🎉 Kimchi, Kelp noodle, Soy bean paste sauce(Ssamjang), Fresh chili & garlic,
-            and Fresh Korean lettuce are available for free refills at the bar on the right.
-          </p>
-        </div>
       </div>
     </header>
   )
 }
+
+export const HeaderBanner = () => (
+  <div className="w-full bg-black p-4 pt-0">
+    <div className="flex items-center justify-center mb-4 w-full">
+      <p className="text-xs text-gray-400">Restaurant</p>
+    </div>
+    {/* Operating hours */}
+    <div className="flex items-center justify-center gap-2 text-sm">
+      <span className="text-primary font-semibold">Open Hours</span>
+      <span className="text-gray-400">| AM 11:00~PM 10:00</span>
+    </div>
+    {/* Table badge */}
+    <div className="mt-3 flex justify-center">
+      <Badge className="bg-primary text-white border-0 px-4 py-1">Table. 1</Badge>
+    </div>
+    {/* Announcement banner */}
+    <div className="mt-4 p-3 bg-gray-800 rounded-lg text-sm text-gray-300">
+      <p className="text-center">
+        🎉 Self-serve Side bar OPEN 🎉 Kimchi, Kelp noodle, Soy bean paste sauce(Ssamjang), Fresh chili & garlic, and Fresh Korean lettuce are available for free refills at the bar on the right.
+      </p>
+    </div>
+  </div>
+)

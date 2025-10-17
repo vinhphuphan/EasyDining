@@ -19,6 +19,10 @@ export interface MenuItem {
     flavors?: { name: string; price: number }[]
     sizes?: { name: string; price: number }[]
   }
+  // Badges / tags for UI highlights
+  isBest?: boolean
+  isVeg?: boolean
+  isSpicy?: boolean
 }
 
 /**
@@ -51,6 +55,7 @@ export const menuItems: MenuItem[] = [
     category: "Chef Recommendation",
     image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&h=300&fit=crop",
     description: "Creamy butter chicken with spices, served with rice.",
+    isBest: true,
   },
   {
     id: "2",
@@ -88,6 +93,7 @@ export const menuItems: MenuItem[] = [
     category: "Chef Recommendation",
     image: "https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=400&h=300&fit=crop",
     description: "Crispy nachos topped with spicy tuna, jalapeños, and avocado.",
+    isSpicy: true,
   },
   {
     id: "6",
@@ -97,6 +103,7 @@ export const menuItems: MenuItem[] = [
     category: "Chef Recommendation",
     image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=400&h=300&fit=crop",
     description: "Delicious banana wrapped in a soft tortilla with honey.",
+    isVeg: true,
   },
 
   // ========== Soups ==========
@@ -148,6 +155,7 @@ export const menuItems: MenuItem[] = [
     category: "Rice",
     image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop",
     description: "Spicy fried rice with green chili and vegetables.",
+    isSpicy: true,
   },
   {
     id: "12",
@@ -189,6 +197,8 @@ export const menuItems: MenuItem[] = [
     category: "Pizza",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaOd-yzw835koYdEr8v0ecT5lvreJgMrz76g&s",
     description: "Loaded with fresh vegetables and melted cheese.",
+    isVeg: true,
+    isBest: true,
   },
 
   // ========== Mexican ==========
@@ -232,6 +242,7 @@ export const menuItems: MenuItem[] = [
     category: "Drink",
     image: "https://images.unsplash.com/photo-1546173159-315724a31696?w=400&h=300&fit=crop",
     description: "Refreshing mango smoothie with ice.",
+    isVeg: true,
   },
   {
     id: "16",

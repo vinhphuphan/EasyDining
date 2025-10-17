@@ -1,25 +1,19 @@
-"use client"
-
-// ============================================
-// CART MODAL
-// ============================================
 // Shopping cart overlay with order summary and payment
-
+"use client"
 import { useState } from "react"
 import { Minus, Plus, X } from "lucide-react"
-
 import { useCart } from "@/contexts/CartContext"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-interface CartModalProps {
+interface CartProps {
   open: boolean
   onClose: () => void
 }
 
-export const CartModal = ({ open, onClose }: CartModalProps) => {
+export const Cart = ({ open, onClose }: CartProps) => {
   const { items, updateQuantity, getTotalPrice } = useCart()
   const [orderNote, setOrderNote] = useState("")
   const [paymentMethod, setPaymentMethod] = useState<"card" | "google-pay" | "cash">("card")
@@ -35,9 +29,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
   const processingFee = subtotal * 0.03
   const total = subtotal + processingFee
 
-  /**
-   * Handle payment submission
-   */
+  // Handle payment submission
   const handlePay = () => {
     alert("Payment processed successfully!")
     onClose()
@@ -55,7 +47,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
               aria-label="Close cart"
             >
               <X className="w-5 h-5" />
@@ -88,6 +80,16 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
                         <span className="text-sm font-semibold">{item.quantity}</span>
                       </div>
 
+                      {/* Item thumbnail */}
+                      <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 mt-0.5">
+                        <img
+                          src={item.image || "/placeholder.svg"}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+
                       <div className="flex-1">
                         <p className="font-medium text-sm leading-tight">{item.name}</p>
                         {item.note && <p className="text-xs text-gray-500 mt-1">Note: {item.note}</p>}
@@ -95,7 +97,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
                         <div className="flex items-center gap-2 mt-2">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                            className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
                             aria-label="Decrease quantity"
                           >
                             <Minus className="w-3.5 h-3.5" />
@@ -103,7 +105,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
                           <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                            className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
                             aria-label="Increase quantity"
                           >
                             <Plus className="w-3.5 h-3.5" />
@@ -131,7 +133,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
               <Button
                 onClick={onClose}
                 variant="outline"
-                className="w-full mt-4 border-gray-300 hover:bg-gray-50 bg-transparent"
+                className="w-full mt-4 border-gray-300 hover:bg-gray-50 bg-transparent cursor-pointer"
               >
                 Add more
               </Button>
@@ -145,9 +147,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
                 <div className="border border-gray-300 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setPaymentMethod("card")}
-                    className={`w-full px-4 py-3 flex items-center justify-between ${
-                      paymentMethod === "card" ? "bg-gray-50" : "bg-white"
-                    }`}
+                    className={`w-full px-4 py-3 flex items-center justify-between ${paymentMethod === "card" ? "bg-gray-50" : "bg-white"} cursor-pointer`}
                   >
                     <span className="font-medium">Cards</span>
                     <div className="w-4 h-4 rounded-full border-2 border-gray-400 flex items-center justify-center">
@@ -187,7 +187,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
                           <Input id="cvv" placeholder="3 digits" value={cvv} onChange={(e) => setCvv(e.target.value)} />
                         </div>
                       </div>
-                      <Button onClick={handlePay} className="w-full bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white">
+                      <Button onClick={handlePay} className="w-full bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white cursor-pointer">
                         Pay
                       </Button>
                     </div>
@@ -196,9 +196,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
 
                 <button
                   onClick={() => setPaymentMethod("google-pay")}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg flex items-center justify-between ${
-                    paymentMethod === "google-pay" ? "bg-gray-50" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg flex items-center justify-between ${paymentMethod === "google-pay" ? "bg-gray-50" : "bg-white"} cursor-pointer`}
                 >
                   <span className="font-medium">Google Pay</span>
                   <div className="w-4 h-4 rounded-full border-2 border-gray-400 flex items-center justify-center">
@@ -208,9 +206,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
 
                 <button
                   onClick={() => setPaymentMethod("cash")}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg flex items-center justify-between ${
-                    paymentMethod === "cash" ? "bg-gray-50" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg flex items-center justify-between ${paymentMethod === "cash" ? "bg-gray-50" : "bg-white"} cursor-pointer`}
                 >
                   <span className="font-medium text-left">Pay by cash or card before leaving</span>
                   <div className="w-4 h-4 rounded-full border-2 border-gray-400 flex items-center justify-center flex-shrink-0">
@@ -235,7 +231,7 @@ export const CartModal = ({ open, onClose }: CartModalProps) => {
               </div>
 
               {paymentMethod !== "card" && (
-                <Button onClick={handlePay} className="w-full mt-4 bg-primary hover:bg-primary/90 text-white h-12">
+                <Button onClick={handlePay} className="w-full mt-4 bg-primary hover:bg-primary/90 text-white h-12 cursor-pointer">
                   Confirm Order
                 </Button>
               )}

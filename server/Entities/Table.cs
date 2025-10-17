@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace server.Entities;
 
 public class Table : BaseEntity
@@ -8,9 +10,10 @@ public class Table : BaseEntity
     public int Seats { get; set; }
 
     // One-to-many: a Table can have many orders
-    public ICollection<Order>? Orders { get; set; }
+    // public ICollection<Order>? Orders { get; set; }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum TableStatus
 {
     Available,

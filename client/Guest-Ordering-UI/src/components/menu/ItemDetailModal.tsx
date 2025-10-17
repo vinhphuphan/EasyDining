@@ -1,10 +1,4 @@
 "use client"
-
-// ============================================
-// ITEM DETAIL MODAL
-// ============================================
-// Modal for viewing item details and adding to cart
-
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -15,12 +9,13 @@ import { X, Minus, Plus } from "lucide-react"
 import type { MenuItem } from "@/data/menuData"
 
 interface ItemDetailModalProps {
-  item: MenuItem | null
-  open: boolean
-  onClose: () => void
+  item: MenuItem | null;
+  open: boolean;
+  onClose: () => void;
+  openCartDialog?: () => void;
 }
 
-export const ItemDetailModal = ({ item, open, onClose }: ItemDetailModalProps) => {
+export const ItemDetailModal = ({ item, open, onClose, openCartDialog }: ItemDetailModalProps) => {
   const { addItem } = useCart()
   const [quantity, setQuantity] = useState<number>(1)
   const [note, setNote] = useState<string>("")
@@ -28,23 +23,17 @@ export const ItemDetailModal = ({ item, open, onClose }: ItemDetailModalProps) =
   // Early return if no item
   if (!item) return null
 
-  /**
-   * Increase quantity
-   */
+  // Increase quantity
   const handleIncrease = () => {
     setQuantity((prev) => prev + 1)
   }
 
-  /**
-   * Decrease quantity (minimum 1)
-   */
+  // Decrease quantity (minimum 1)
   const handleDecrease = () => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1))
   }
 
-  /**
-   * Add item to cart with quantity and note
-   */
+  //  Add item to cart with quantity and note
   const handleAddToCart = () => {
     addItem({
       name: item.name,
@@ -57,7 +46,9 @@ export const ItemDetailModal = ({ item, open, onClose }: ItemDetailModalProps) =
     toast.success(`Added ${quantity} × ${item.name}`, {
       action: {
         label: "View Cart",
-        onClick: () => (window.location.href = "/cart"),
+        onClick: () => {
+          if (openCartDialog) openCartDialog();
+        },
       },
     })
 

@@ -97,52 +97,37 @@ namespace server.Controllers
         {
             if (string.IsNullOrWhiteSpace(search)) return null;
 
-            var nameProp = typeof(T).GetProperty("Name");
-            if (nameProp == null || nameProp.PropertyType != typeof(string)) return null;
+            // If entity has property "Name" , search by Name. Ortherwise, null.
+            var prop = typeof(T).GetProperty("Name");
+            if (prop == null || prop.PropertyType != typeof(string)) return null;
 
+            // Create the formula: e => e.Name.Contains(search)
             var parameter = Expression.Parameter(typeof(T), "e");
-            var propAccess = Expression.Property(parameter, nameProp);
-            var notNull = Expression.NotEqual(propAccess, Expression.Constant(null, typeof(string)));
+            var property = Expression.Property(parameter, prop);
             var searchConst = Expression.Constant(search);
-            var containsMethod = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) });
-            if (containsMethod == null) return null;
+            var contains = Expression.Call(property, nameof(string.Contains), null, searchConst);
 
-            var containsCall = Expression.Call(propAccess, containsMethod, searchConst);
-            var andExpr = Expression.AndAlso(notNull, containsCall);
-            return Expression.Lambda<Func<T, bool>>(andExpr, parameter);
+            return Expression.Lambda<Func<T, bool>>(contains, parameter);
         }
+
 
         private static Func<IQueryable<T>, IOrderedQueryable<T>> BuildOrderBy(string? sort)
         {
-            // Default: always order by Id ascending
-            static IOrderedQueryable<T> OrderById(IQueryable<T> query)
-                => query.OrderBy(e => EF.Property<object>(e, nameof(BaseEntity.Id)));
-
-            var sortKey = sort?.Trim().ToLowerInvariant();
-            var hasName = typeof(T).GetProperty("Name") != null;
-            var hasPrice = typeof(T).GetProperty("Price") != null;
-
             return query =>
             {
-                if (string.IsNullOrWhiteSpace(sortKey))
-                {
-                    return OrderById(query);
-                }
+                if (string.IsNullOrWhiteSpace(sort))
+                    return query.OrderBy(e => EF.Property<object>(e, nameof(BaseEntity.Id)));
 
-                switch (sortKey)
+                return sort.ToLower() switch
                 {
-                    case "nameasc" when hasName:
-                        return query.OrderBy(e => EF.Property<object>(e, "Name"));
-                    case "namedesc" when hasName:
-                        return query.OrderByDescending(e => EF.Property<object>(e, "Name"));
-                    case "priceasc" when hasPrice:
-                        return query.OrderBy(e => EF.Property<object>(e, "Price"));
-                    case "pricedesc" when hasPrice:
-                        return query.OrderByDescending(e => EF.Property<object>(e, "Price"));
-                    default:
-                        return OrderById(query);
-                }
+                    "nameasc" => query.OrderBy(e => EF.Property<object>(e, "Name")),
+                    "namedesc" => query.OrderByDescending(e => EF.Property<object>(e, "Name")),
+                    "priceasc" => query.OrderBy(e => EF.Property<object>(e, "Price")),
+                    "pricedesc" => query.OrderByDescending(e => EF.Property<object>(e, "Price")),
+                    _ => query.OrderBy(e => EF.Property<object>(e, nameof(BaseEntity.Id)))
+                };
             };
         }
+
     }
 }

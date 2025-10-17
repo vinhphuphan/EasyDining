@@ -1,137 +1,93 @@
 "use client"
+import { useState } from "react";
+import { Header, HeaderBanner } from "@/components/header/Header";
+import { CategoryNav } from "@/components/header/CategoryNav";
+import { ItemDetailModal } from "@/components/menu/ItemDetailModal";
+import { Cart } from "@/components/cart/Cart";
+import OrdersModal from "@/components/cart/OrdersModal";
+import { menuItems, menuCategories, type MenuItem } from "@/data/menuData";
+import { useScrollSpy } from "@/hooks/useScrollSpy";
+import { useCategoryCollapse } from "@/hooks/useCategoryCollapse";
+import { MenuCategorySection } from "@/components/menu/MenuCategorySection";
+import { ClipboardList } from "lucide-react";
 
-// ============================================
-// MAIN PAGE
-// ============================================
-// Primary ordering interface with continuous scrolling menu
+/**
+ * Main page for the menu (customer ordering screen).
+ * Handles category navigation, scroll synchronization,
+ * and modal interactions for item details, cart, and orders.
+ */
 
-import { useState, useEffect, useRef } from "react"
-import { Header } from "@/components/Header"
-import { CategoryNav } from "@/components/CategoryNav"
-import { MenuItemCard } from "@/components/MenuItemCard"
-import { ItemDetailModal } from "@/components/ItemDetailModal"
-import { CartModal } from "@/components/CartModal"
-import OrdersModal from "@/components/OrdersModal"
-import { menuItems, menuCategories, type MenuItem } from "@/data/menuData"
-import { ClipboardList } from "lucide-react"
+export default function Index() {
+  // State for modals and selected item
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [cartModalOpen, setCartModalOpen] = useState(false);
+  const [ordersModalOpen, setOrdersModalOpen] = useState(false);
 
-const Index = () => {
-  // State management
-  const [activeCategory, setActiveCategory] = useState(menuCategories[0])
-  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [cartModalOpen, setCartModalOpen] = useState(false)
-  const [ordersModalOpen, setOrdersModalOpen] = useState(false)
+  // Scroll spy logic (tracks visible category)
+  const { activeCategory, categoryRefs, scrollToCategory } = useScrollSpy(menuCategories);
 
-  const categoryRefs = useRef<{ [key: string]: HTMLElement | null }>({})
-  const isScrollingToCategory = useRef(false)
+  // Category collapse state
+  const { openCategories, toggleCategory } = useCategoryCollapse(menuCategories);
 
-  /**
-   * Scroll spy effect - updates active category based on scroll position
-   */
-  useEffect(() => {
-    const handleScroll = () => {
-      // Don't update active category if user clicked a category (programmatic scroll)
-      if (isScrollingToCategory.current) return
-
-      const scrollPosition = window.scrollY + 300 // Offset for header + nav
-
-      // Find which category section is currently in view
-      for (const category of menuCategories) {
-        const element = categoryRefs.current[category]
-        if (element) {
-          const { offsetTop, offsetHeight } = element
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveCategory(category)
-            break
-          }
-        }
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  /**
-   * Handle category click - scroll to category section
-   */
-  const handleCategoryChange = (category: string) => {
-    const element = categoryRefs.current[category]
-    if (element) {
-      isScrollingToCategory.current = true
-      setActiveCategory(category)
-
-      // Scroll to category with offset for fixed header
-      const yOffset = -220 // Header + nav height
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset
-
-      window.scrollTo({ top: y, behavior: "smooth" })
-
-      // Reset flag after scroll completes
-      setTimeout(() => {
-        isScrollingToCategory.current = false
-      }, 1000)
-    }
-  }
-
-  /**
-   * Handle menu item click - open detail modal
-   */
+  // Handle user clicking a menu item card
   const handleItemClick = (item: MenuItem) => {
-    setSelectedItem(item)
-    setModalOpen(true)
-  }
+    setSelectedItem(item);
+    setModalOpen(true);
+  };
 
+  // Group menu items by category
   const itemsByCategory = menuCategories
-    .map((category) => ({
+    .map(category => ({
       category,
-      items: menuItems.filter((item) => item.category === category),
+      items: menuItems.filter(item => item.category === category),
     }))
-    .filter((group) => group.items.length > 0)
+    .filter(group => group.items.length > 0);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with cart button */}
+      {/* Header and navigation */}
       <Header onCartClick={() => setCartModalOpen(true)} />
+      <HeaderBanner />
+      <CategoryNav activeCategory={activeCategory} onCategoryChange={scrollToCategory} />
 
-      {/* Category navigation */}
-      <CategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
-
-      {/* Main content area - continuous scroll */}
-      <main className="container mx-auto px-4 py-6 pb-24">
+      {/* Main menu content */}
+      <main className="w-full px-4 py-6 pb-24">
         {itemsByCategory.map(({ category, items }) => (
-          <section key={category} ref={(el) => (categoryRefs.current[category] = el)} className="mb-12">
-            {/* Category title */}
-            <h2 className="text-2xl font-bold mb-6 border-b border-border pb-2">{category}</h2>
-
-            {/* Menu items for this category */}
-            <div className="space-y-4">
-              {items.map((item) => (
-                <MenuItemCard key={item.id} item={item} onClick={() => handleItemClick(item)} />
-              ))}
-            </div>
-          </section>
+          <MenuCategorySection
+            key={category}
+            category={category}
+            items={items}
+            open={openCategories[category]}
+            onToggle={() => toggleCategory(category)}
+            onItemClick={handleItemClick}
+            categoryRef={el => { categoryRefs.current[category] = el; }}
+          />
         ))}
       </main>
 
+      {/* Floating button to view current orders */}
       <button
         onClick={() => setOrdersModalOpen(true)}
-        className="fixed bottom-10 cursor-pointer left-4 z-30 bg-gray-900 text-white p-4 rounded-full shadow-lg hover:bg-gray-800 transition-colors"
+        className="fixed bottom-10 left-4 z-30 bg-gray-900 text-white p-4 rounded-full shadow-lg hover:bg-gray-800 transition-colors"
         aria-label="View orders"
       >
         <ClipboardList className="w-6 h-6" />
       </button>
 
       {/* Item detail modal */}
-      <ItemDetailModal item={selectedItem} open={modalOpen} onClose={() => setModalOpen(false)} />
+      <ItemDetailModal
+        item={selectedItem}
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        openCartDialog={() => setCartModalOpen(true)}
+      />
 
       {/* Cart modal */}
-      <CartModal open={cartModalOpen} onClose={() => setCartModalOpen(false)} />
+      <Cart open={cartModalOpen} onClose={() => setCartModalOpen(false)} />
 
+      {/* Orders modal */}
       <OrdersModal isOpen={ordersModalOpen} onClose={() => setOrdersModalOpen(false)} />
     </div>
-  )
+  );
 }
-
-export default Index

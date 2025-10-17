@@ -8,4 +8,8 @@ public class MenuItem : BaseEntity
     public string? ImageUrl { get; set; } = "";
     public string? Category { get; set; } = "";
     public bool IsAvailable { get; set; } = true;
+    // UI flags
+    public bool IsBest { get; set; } = false;
+    public bool IsVeg { get; set; } = false;
+    public bool IsSpicy { get; set; } = false;
 }
