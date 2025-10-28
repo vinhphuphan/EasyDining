@@ -186,38 +186,38 @@ public class DbInitializer
             context.SaveChanges();
         }
 
-        // ===== Employees =====
-        if (!context.Employees.Any())
-        {
-            var employees = new List<Employee>
-        {
-            new() {
-                Name = "Richardo Wilson",
-                Email = "richardo.wilson@gmail.com",
-                PinCode = "123456",
-                Role = "Waiter",
-                Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/professional-man.jpg",
-                ShiftStart =TimeSpan.Parse("10:00:00"),
-                ShiftEnd = TimeSpan.Parse("14:00:00")
-                },
-            new() {
-                Name = "Orlando",
-                Email = "orlando@easydining.com",
-                PinCode = "234567",
-                Role = "Waiter",
-                Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/young-waiter.jpg", ShiftStart = TimeSpan.Parse("14:00:00"), ShiftEnd = TimeSpan.Parse("18:00:00")
-                },
-            new() {
-                Name = "Eve",
-                Email = "eve@easydining.com",
-                PinCode = "345678",
-                Role = "Waiter",
-                Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/user-03.jpg", ShiftStart = TimeSpan.Parse("18:00:00"), ShiftEnd = TimeSpan.Parse("22:00:00")
-                }
-            };
-            context.Employees.AddRange(employees);
-            context.SaveChanges();
-        }
+        // // ===== Employees =====
+        // if (!context.Employees.Any())
+        // {
+        //     var employees = new List<Employee>
+        // {
+        //     new() {
+        //         Name = "Richardo Wilson",
+        //         Email = "richardo.wilson@gmail.com",
+        //         PinCode = "123456",
+        //         Role = "Waiter",
+        //         Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/professional-man.jpg",
+        //         ShiftStart =TimeSpan.Parse("10:00:00"),
+        //         ShiftEnd = TimeSpan.Parse("14:00:00")
+        //         },
+        //     new() {
+        //         Name = "Orlando",
+        //         Email = "orlando@easydining.com",
+        //         PinCode = "234567",
+        //         Role = "Waiter",
+        //         Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/young-waiter.jpg", ShiftStart = TimeSpan.Parse("14:00:00"), ShiftEnd = TimeSpan.Parse("18:00:00")
+        //         },
+        //     new() {
+        //         Name = "Eve",
+        //         Email = "eve@easydining.com",
+        //         PinCode = "345678",
+        //         Role = "Waiter",
+        //         Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/user-03.jpg", ShiftStart = TimeSpan.Parse("18:00:00"), ShiftEnd = TimeSpan.Parse("22:00:00")
+        //         }
+        //     };
+        //     context.Employees.AddRange(employees);
+        //     context.SaveChanges();
+        // }
 
         // ===== Tables =====
         if (!context.Tables.Any())

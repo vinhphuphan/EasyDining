@@ -1,13 +1,14 @@
 "use client"
 import { useRef, useEffect } from "react"
-import { menuCategories } from "@/data/menuData"
+
 
 interface CategoryNavProps {
   activeCategory: string
   onCategoryChange: (category: string) => void
+  categories: string[]
 }
 
-export const CategoryNav = ({ activeCategory, onCategoryChange }: CategoryNavProps) => {
+export const CategoryNav = ({ activeCategory, onCategoryChange, categories }: CategoryNavProps) => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({})
 
@@ -34,7 +35,7 @@ export const CategoryNav = ({ activeCategory, onCategoryChange }: CategoryNavPro
     <nav className="sticky top-20 z-40 bg-background border-b border-border">
       <div ref={scrollRef} className="w-full px-4 overflow-x-auto scrollbar-hide">
         <div className="flex gap-5 py-3 min-w-max">
-          {menuCategories.map((category) => (
+          {categories.map((category) => (
             <button
               key={category}
               ref={(el) => {

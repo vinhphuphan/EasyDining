@@ -1,68 +1,143 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Plus, SquareMenu } from "lucide-react"
+import { Search, Plus, SquareMenu, Loader2, AlertCircle, Pencil, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { NotificationPanel } from "@/components/notification-panel"
 import { AddDishModal } from "@/components/modals/add-dish-modal"
-import { menuItems } from "@/lib/mock-data"
-
+import DeleteConfirmModal from "@/components/modals/delete-confirm-modal"
+import { useMenu, useCategories } from "@/hooks/useMenu"
+import { useUpdateMenuItemMutation, useDeleteMenuItemMutation } from "@/store/api/menuApi"
+import type { MenuItem } from "@/types/menuItem"
+import { Spinner } from "@/components/ui/spinner"
 
 export default function InventoryPage() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [isAddDishOpen, setIsAddDishOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<"menu" | "ingredients" | "request">("menu")
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"all" | "available" | "not-available">("all")
-  const [stockFilter, setStockFilter] = useState<"all" | "low" | "medium" | "high" | "empty">("all")
-  const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [statusFilter, setStatusFilter] = useState<"available" | "not-available">("available")
+  const [categoryFilter, setCategoryFilter] = useState<string>("")
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [deleteMenuItemId, setDeleteMenuItemId] = useState<number | null>(null)
+  const [editMenuItem, setEditMenuItem] = useState<MenuItem | null>(null)
 
-  const categories = ["all", "soup", "noodle", "rice", "dessert", "drink"]
+  // Sử dụng custom hooks từ useMenu.ts
+  const { menuItems, isLoading: menuLoading, error: menuError, refetch } = useMenu()
+  const { categories: apiCategories, isLoading: categoriesLoading, error: categoriesError } = useCategories()
 
-  const filteredItems = menuItems.filter((item) => {
+  // API mutations
+  const [updateMenuItem, { isLoading: isUpdating }] = useUpdateMenuItemMutation()
+  const [deleteMenuItem, { isLoading: isDeleting }] = useDeleteMenuItemMutation()
+
+  // Sử dụng categories từ API (không thêm "all")
+  const categories = apiCategories
+
+  // Filter menu items based on search and filters
+  const filteredItems = menuItems.filter((item: MenuItem) => {
     const matchesSearch = searchQuery === "" || item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "available" && item.stockStatus !== "out-of-stock") ||
-      (statusFilter === "not-available" && item.stockStatus === "out-of-stock")
-    const matchesStock =
-      stockFilter === "all" ||
-      (stockFilter === "low" && item.stockLevel === "low") ||
-      (stockFilter === "medium" && item.stockLevel === "medium") ||
-      (stockFilter === "high" && item.stockLevel === "high") ||
-      (stockFilter === "empty" && item.stockStatus === "out-of-stock")
-    const matchesCategory = categoryFilter === "all" || item.category.toLowerCase() === categoryFilter
+    const matchesStatus = statusFilter === "available" ? item.isAvailable : !item.isAvailable
+    const matchesCategory = categoryFilter === "" || (item.category && item.category.toLowerCase() === categoryFilter.toLowerCase())
 
-    return matchesSearch && matchesStatus && matchesStock && matchesCategory
+    return matchesSearch && matchesStatus && matchesCategory
   })
 
+  // Calculate counts for status filter
   const statusCounts = {
-    all: menuItems.length,
-    available: menuItems.filter((i) => i.stockStatus !== "out-of-stock").length,
-    "not-available": menuItems.filter((i) => i.stockStatus === "out-of-stock").length,
+    available: menuItems.filter((item: MenuItem) => item.isAvailable).length,
+    "not-available": menuItems.filter((item: MenuItem) => !item.isAvailable).length,
   }
 
-  const stockCounts = {
-    all: menuItems.length,
-    low: menuItems.filter((i) => i.stockLevel === "low").length,
-    medium: menuItems.filter((i) => i.stockLevel === "medium").length,
-    high: menuItems.filter((i) => i.stockLevel === "high").length,
-    empty: menuItems.filter((i) => i.stockStatus === "out-of-stock").length,
-  }
-
+  // Calculate counts for category filter
   const categoryCounts = categories.reduce(
     (acc, cat) => {
-      if (cat === "all") {
-        acc[cat] = menuItems.length
-      } else {
-        acc[cat] = menuItems.filter((i) => i.category.toLowerCase() === cat).length
-      }
+      acc[cat] = menuItems.filter((item: MenuItem) =>
+        item.category && item.category.toLowerCase() === cat.toLowerCase()
+      ).length
       return acc
     },
     {} as Record<string, number>,
   )
+
+  // Handle edit menu item
+  const handleEditMenuItem = (item: MenuItem) => {
+    setEditMenuItem(item)
+    setIsAddDishOpen(true)
+  }
+
+  // Handle delete request
+  const handleDeleteRequest = (id: number) => {
+    setDeleteMenuItemId(id)
+    setIsDeleteOpen(true)
+  }
+
+  // Handle confirm delete
+  const handleConfirmDelete = async () => {
+    if (!deleteMenuItemId) return
+
+    try {
+      await deleteMenuItem(deleteMenuItemId).unwrap()
+      // Refetch data after successful delete
+      refetch()
+    } catch (error) {
+      console.error('Failed to delete menu item:', error)
+      // You can add toast notification here
+    } finally {
+      setDeleteMenuItemId(null)
+      setIsDeleteOpen(false)
+    }
+  }
+
+  // Handle toggle availability (quick edit)
+  const handleToggleAvailability = async (item: MenuItem) => {
+    try {
+      await updateMenuItem({
+        id: item.id,
+        updates: { isAvailable: !item.isAvailable }
+      }).unwrap()
+      // Refetch data after successful update
+      refetch()
+    } catch (error) {
+      console.error('Failed to update menu item:', error)
+      // You can add toast notification here
+    }
+  }
+
+  // Loading state
+  if (menuLoading || categoriesLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center h-64">
+          <Button disabled size="lg">
+            <Spinner />
+            Loading...
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (menuError || categoriesError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <AlertCircle className="h-8 w-8 text-red-500" />
+          <div>
+            <h2 className="text-lg font-semibold text-red-600">Error Loading Menu</h2>
+            <p className="text-muted-foreground">
+              {menuError ? `Menu Error: ${menuError.toString()}` : ""}
+              {categoriesError ? `Categories Error: ${categoriesError.toString()}` : ""}
+            </p>
+          </div>
+          <Button onClick={() => refetch()} variant="outline">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,14 +152,6 @@ export default function InventoryPage() {
           <div>
             <h4 className="text-sm font-medium mb-2">DISHES STATUS</h4>
             <div className="space-y-1">
-              <button
-                onClick={() => setStatusFilter("all")}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm ${statusFilter === "all" ? "bg-primary text-primary-foreground" : "hover:bg-accent"
-                  }`}
-              >
-                <span>All</span>
-                <Badge variant="secondary">{statusCounts.all}</Badge>
-              </button>
               <button
                 onClick={() => setStatusFilter("available")}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm ${statusFilter === "available" ? "bg-primary text-primary-foreground" : "hover:bg-accent"
@@ -101,24 +168,6 @@ export default function InventoryPage() {
                 <span>Not Available</span>
                 <Badge variant="secondary">{statusCounts["not-available"]}</Badge>
               </button>
-            </div>
-          </div>
-
-          {/* Stock Level */}
-          <div>
-            <h4 className="text-sm font-medium mb-2">STOCK LEVEL</h4>
-            <div className="space-y-1">
-              {(["all", "low", "medium", "high", "empty"] as const).map((level) => (
-                <button
-                  key={level}
-                  onClick={() => setStockFilter(level)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm capitalize ${stockFilter === level ? "bg-primary text-primary-foreground" : "hover:bg-accent"
-                    }`}
-                >
-                  <span>{level}</span>
-                  <Badge variant="secondary">{stockCounts[level]}</Badge>
-                </button>
-              ))}
             </div>
           </div>
 
@@ -144,9 +193,8 @@ export default function InventoryPage() {
             variant="outline"
             className="w-full bg-transparent"
             onClick={() => {
-              setStatusFilter("all")
-              setStockFilter("all")
-              setCategoryFilter("all")
+              setStatusFilter("available")
+              setCategoryFilter("")
               setSearchQuery("")
             }}
           >
@@ -170,33 +218,23 @@ export default function InventoryPage() {
               <SquareMenu className="h-6 w-6" />
               <h1 className="text-2xl font-semibold">Menu</h1>
             </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex items-center gap-2 mb-6">
-            <button
-              onClick={() => setActiveTab("menu")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === "menu" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"
-                }`}
-            >
-              Menu
-            </button>
-            <button
-              onClick={() => setActiveTab("ingredients")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === "ingredients"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-accent"
-                }`}
-            >
-              Ingredients
-            </button>
-            <button
-              onClick={() => setActiveTab("request")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === "request" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"
-                }`}
-            >
-              Request List
-            </button>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-green-600">
+                {menuItems.length} Items
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                disabled={menuLoading}
+              >
+                {menuLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Refresh"
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Search and Add */}
@@ -219,58 +257,144 @@ export default function InventoryPage() {
           {/* Menu List Header */}
           <div className="mb-4">
             <h2 className="text-lg font-semibold">Menu List</h2>
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredItems.length} of {menuItems.length} items
+            </p>
           </div>
 
           {/* Menu Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-card rounded-lg overflow-hidden border hover:shadow-lg transition-shadow"
-              >
-                <div className="relative">
-                  <img src={item.image || "/placeholder.svg"} alt={item.name} className="w-full h-48 object-cover" />
-                  <Badge
-                    className={`absolute top-3 left-3 ${item.stockStatus === "out-of-stock"
-                      ? "bg-red-500 hover:bg-red-600"
-                      : "bg-green-500 hover:bg-green-600"
-                      }`}
-                  >
-                    <div className="h-2 w-2 rounded-full bg-white mr-1" />
-                    {item.stockStatus === "out-of-stock" ? "Available" : "Available"}
-                  </Badge>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold mb-1">{item.name}</h3>
-                  <p className="text-sm text-muted-foreground capitalize mb-3">{item.category}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Can be served: </span>
-                      <span className="font-semibold">{item.availableServing || 30}</span>
+          {filteredItems.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <SquareMenu className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No menu items found</h3>
+              <p className="text-muted-foreground mb-4">
+                {searchQuery || statusFilter !== "available" || categoryFilter !== ""
+                  ? "Try adjusting your filters or search terms."
+                  : "No menu items available. Add some dishes to get started."}
+              </p>
+              {(!searchQuery && statusFilter === "available" && categoryFilter === "") && (
+                <Button onClick={() => setIsAddDishOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Dish
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredItems.map((item: MenuItem) => (
+                <div
+                  key={item.id}
+                  className="group bg-card rounded-lg overflow-hidden border hover:shadow-lg transition-shadow cursor-pointer"
+                >
+                  <div className="relative">
+                    <img
+                      src={item.imageUrl || "/placeholder.svg"}
+                      alt={item.name}
+                      className="w-full h-48 object-cover"
+                    />
+
+                    {/* Edit / Delete controls - tương tự table page */}
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditMenuItem(item)
+                        }}
+                        className="p-1 rounded bg-white hover:opacity-80 transition cursor-pointer"
+                        disabled={isUpdating}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteRequest(item.id)
+                        }}
+                        className="p-1 rounded bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+                        disabled={isDeleting}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </button>
                     </div>
+
+                    {/* Availability Badge */}
                     <Badge
-                      variant="secondary"
-                      className={
-                        item.stockLevel === "high"
-                          ? "bg-green-100 text-green-700"
-                          : item.stockLevel === "medium"
-                            ? "bg-orange-100 text-orange-700"
-                            : "bg-red-100 text-red-700"
-                      }
+                      className={`absolute top-3 left-3 cursor-pointer ${item.isAvailable
+                        ? "bg-green-500 hover:bg-green-600"
+                        : "bg-red-500 hover:bg-red-600"
+                        }`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleToggleAvailability(item)
+                      }}
                     >
-                      {item.stockLevel === "high" ? "High" : item.stockLevel === "medium" ? "Medium" : "low"}
+                      <div className="h-2 w-2 rounded-full bg-white mr-1" />
+                      {item.isAvailable ? "Available" : "Not Available"}
                     </Badge>
+
+                    {/* Special badges */}
+                    <div className="absolute bottom-3 left-3 flex flex-col gap-1">
+                      {item.isBest && (
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">
+                          Best
+                        </Badge>
+                      )}
+                      {item.isVeg && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                          Veg
+                        </Badge>
+                      )}
+                      {item.isSpicy && (
+                        <Badge variant="secondary" className="bg-red-100 text-red-700 text-xs">
+                          Spicy
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold mb-1">{item.name}</h3>
+                    <p className="text-sm text-muted-foreground capitalize mb-2">
+                      {item.category || "Uncategorized"}
+                    </p>
+                    {item.description && (
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                        {item.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <div className="text-lg font-semibold text-green-600">
+                        ${item.price}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        ID: {item.id}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </main>
       </div>
 
       {/* Modals */}
       <NotificationPanel isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
-      <AddDishModal isOpen={isAddDishOpen} onClose={() => setIsAddDishOpen(false)} />
+      <AddDishModal
+        isOpen={isAddDishOpen}
+        onClose={() => {
+          setIsAddDishOpen(false)
+          setEditMenuItem(null)
+        }}
+
+      />
+      <DeleteConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Menu Item"
+        description="Are you sure you want to delete this menu item? This action cannot be undone."
+
+      />
     </div>
   )
 }

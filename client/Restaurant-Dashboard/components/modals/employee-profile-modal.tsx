@@ -163,7 +163,7 @@ export function EmployeeProfileModal({ isOpen, onClose, employee }: EmployeeProf
                                             <div className="flex items-center gap-4">
                                                 <Avatar className="h-16 w-16">
                                                     <AvatarImage src={editedEmployee.avatar || "/placeholder.svg"} />
-                                                    <AvatarFallback>{editedEmployee.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                                    <AvatarFallback>{editedEmployee.name}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
                                                     <div className="text-sm text-muted-foreground">Employee ID# {editedEmployee.id}</div>

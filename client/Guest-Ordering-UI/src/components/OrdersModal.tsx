@@ -1,5 +1,6 @@
 "use client"
 
+import { useCart } from "@/hooks/useCart"
 /**
  * OrdersModal Component
  *
@@ -8,7 +9,7 @@
  */
 
 import { X } from "lucide-react"
-import { useCart } from "../contexts/CartContext"
+
 import { AlertCircle } from "lucide-react"
 
 interface OrdersModalProps {
@@ -53,13 +54,16 @@ export default function OrdersModal({ isOpen, onClose }: OrdersModalProps) {
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center gap-4 pb-4 border-b last:border-b-0">
                     <img
-                      src={item.image || "/placeholder.svg"}
+                      src={item.imageUrl || "/placeholder.svg"}
                       alt={item.name}
                       className="w-16 h-16 object-cover rounded-lg"
                     />
                     <div className="flex-1">
                       <h3 className="font-medium">{item.name}</h3>
                       <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                      {item.note && (
+                        <p className="text-xs text-gray-400 mt-1 italic">Note: {item.note}</p>
+                      )}
                     </div>
                     <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
                   </div>

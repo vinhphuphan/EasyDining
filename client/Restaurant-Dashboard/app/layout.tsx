@@ -11,15 +11,16 @@ import CreateOrderModalRenderer from "@/components/modals/create-order-modal-ren
 import { Toaster } from "sonner"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { AuthProvider } from "@/context/AuthContext";
+import { ReduxProvider } from "@/components/providers/ReduxProvider";
+
 
 export const metadata: Metadata = {
-  title: "EasyDining - Restaurant POS System",
+  title: "EasyDining - Dashboard",
   description: "Cloud-based restaurant management system to simplify your work",
   icons: {
     icon: "/logo.png",
   },
 }
-
 
 export default function RootLayout({
   children,
@@ -29,15 +30,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
-        <ErrorBoundary>
-          <AuthProvider>
-            <CreateOrderModalProvider>
-              <Header />
-              <Suspense fallback={null}>{children}</Suspense>
-              <CreateOrderModalRenderer />
-            </CreateOrderModalProvider>
-          </AuthProvider>
-        </ErrorBoundary>
+        <ReduxProvider>
+          <ErrorBoundary>
+            <AuthProvider>
+              <CreateOrderModalProvider>
+                <Header />
+                <Suspense fallback={null}>{children}</Suspense>
+                <CreateOrderModalRenderer />
+              </CreateOrderModalProvider>
+            </AuthProvider>
+          </ErrorBoundary>
+        </ReduxProvider>
         <Toaster
           theme="system"
           richColors

@@ -1,7 +1,7 @@
 // Individual menu item display in the list
 "use client"
 import { Card } from "@/components/ui/card"
-import type { MenuItem } from "@/data/menuData"
+import type { MenuItem } from "@/models/menuItem"
 import { Flame } from "lucide-react"
 
 interface MenuItemCardProps {
@@ -22,7 +22,7 @@ export const MenuItemCard = ({ item, onClick }: MenuItemCardProps) => {
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="font-semibold text-lg">
-            {item.name} {item.nameKo && <span className="text-muted-foreground text-sm font-normal">{item.nameKo}</span>}
+            {item.name}
           </h3>
           {/* Badges */}
           {item.isBest && (
@@ -48,7 +48,7 @@ export const MenuItemCard = ({ item, onClick }: MenuItemCardProps) => {
       {/* Item image */}
       <div className="w-20 aspect-square bg-muted rounded-lg flex-shrink-0 ml-4 overflow-hidden">
         <img
-          src={item.image || "/placeholder.svg"}
+          src={item.imageUrl || "/placeholder.svg"}
           alt={item.name}
           loading="lazy"
           className="w-full h-full object-cover"

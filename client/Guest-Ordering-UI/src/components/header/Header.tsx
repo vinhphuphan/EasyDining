@@ -1,8 +1,8 @@
 "use client"
 import { Cloud, ShoppingCart } from "lucide-react"
-import { useCart } from "@/contexts/CartContext"
 import { Badge } from "@/components/ui/badge"
 import { useNavigate } from "react-router-dom"
+import { useCart } from "@/hooks/useCart"
 
 interface HeaderProps {
   onCartClick?: () => void
@@ -10,12 +10,12 @@ interface HeaderProps {
 
 export const Header = ({ onCartClick }: HeaderProps) => {
   const { getTotalItems } = useCart()
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const totalItems = getTotalItems()
 
   return (
     <header className="sticky top-0 z-50 bg-black text-white">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-0 md:px-4 py-4">
         {/* Top row: Logo centered, cart on right */}
         <div className="grid grid-cols-3 items-center">
           {/* Empty left column for centering */}

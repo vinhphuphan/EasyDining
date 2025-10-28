@@ -7,5 +7,22 @@ namespace server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MenuItemsController(AppDbContext context) : BaseApiController<MenuItem>(context) { }
+    public class MenuItemsController : BaseApiController<MenuItem>
+    {
+         public MenuItemsController(AppDbContext context) : base(context)
+        {
+        }
+
+        [HttpGet("categories")]
+        public async Task<ActionResult<IEnumerable<string>>> GetCategoriesAsync()
+        {
+            var categories = await _context.MenuItems
+                .Where(m => !string.IsNullOrEmpty(m.Category))
+                .Select(m => m.Category)
+                .Distinct()
+                .ToListAsync();
+            
+            return Ok(categories);
+        }
+    }
 }

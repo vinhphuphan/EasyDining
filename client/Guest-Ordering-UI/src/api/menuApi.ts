@@ -1,12 +1,11 @@
 import type { MenuItem } from "@/models/menuItem"
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import { createApi } from "@reduxjs/toolkit/query/react"
+import { baseQueryWithErrorHandling } from "./baseApi";
 
 
 export const menuApi = createApi({
     reducerPath: "menuApi",
-    baseQuery: fetchBaseQuery({
-        baseUrl: "http://localhost:7184/api", // Server URL
-    }),
+    baseQuery: baseQueryWithErrorHandling,
     tagTypes: ["MenuItem"],
     endpoints: (builder) => ({
         getMenuItems: builder.query<MenuItem[], void>({
@@ -17,7 +16,15 @@ export const menuApi = createApi({
             query: (id) => ({ url: `menuitems/${id}` }),
             providesTags: ["MenuItem"],
         }),
+        getCategories: builder.query<string[], void>({
+            query: () => ({ url: "menuitems/categories" }),
+        })
     })
 })
 
-export const { useGetMenuItemsQuery, useGetMenuItemByIdQuery } = menuApi;
+// Export hooks
+export const {
+    useGetMenuItemsQuery,
+    useGetMenuItemByIdQuery,
+    useGetCategoriesQuery,
+} = menuApi;

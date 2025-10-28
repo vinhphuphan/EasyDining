@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
     DropdownMenu,
@@ -11,51 +11,65 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogOut, Settings, User as UserIcon, Pencil, ChevronDown } from "lucide-react"
+import { LogOut, Settings, Pencil } from "lucide-react"
 import { EmployeeProfileModal } from "@/components/modals/employee-profile-modal"
 import { toast } from "sonner"
+
+interface User {
+    id: number
+    username: string
+    avatar: string
+    role: string
+}
 
 export default function UserDropdown() {
     const router = useRouter()
     const [open, setOpen] = useState(false)
+    const [isProfileOpen, setIsProfileOpen] = useState(false)
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
-    const currentUser = {
-        id: "01011425",
-        name: "Richardo Wilson",
-        role: "Waiter",
-        avatar: "/professional-man.jpg",
-        shift: "10:00 AM - 12:00 PM",
-        phone: "(629) 555-0123",
-        email: "ajpdesign.info@gmail.com",
-        address: "390 Market Street, Suite 200",
-        joiningDate: "1 Jan, 2025",
-        employmentStatus: "Full-Time Employment",
-        manager: "Alexander Rodriguez",
+    // Get user from localStorage when component mount
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user")
+        if (storedUser) {
+            try {
+                setCurrentUser(JSON.parse(storedUser))
+            } catch (err) {
+                console.error("Error parsing stored user:", err)
+                localStorage.removeItem("user")
+            }
+        }
+    }, [])
+
+    const handleLogout = async () => {
+        try {
+            await fetch("/api/auth/logout", { method: "POST" })
+        } catch (error) {
+            console.log("Error when log out : ", error);
+        } finally {
+            localStorage.removeItem("user")
+            toast.success("Logged out")
+            router.push("/login")
+        }
     }
 
-    const handleLogout = () => {
-        document.cookie = "ed_auth=; Max-Age=0; path=/"
-        toast.success("Logged out")
-        router.push("/login")
-    }
-
-    const goProfile = () => router.push("/profile")
     const goSettings = () => router.push("/settings")
 
-    const [isProfileOpen, setIsProfileOpen] = useState(false)
+    if (!currentUser) {
+        // ⏳ Nếu chưa có user (VD: lúc page mới load)
+        return null
+    }
 
     return (
         <>
             <DropdownMenu open={open} onOpenChange={setOpen}>
                 <DropdownMenuTrigger className="flex items-center gap-2 focus:outline-none cursor-pointer">
                     <Avatar className="h-9 w-9">
-                        <AvatarImage src={currentUser.avatar || "/placeholder.svg"} />
-                        <AvatarFallback>
-                            {currentUser.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                        </AvatarFallback>
+                        <AvatarImage
+                            src={currentUser.avatar || "/placeholder.svg"}
+                            alt={currentUser.username}
+                        />
+                        <AvatarFallback>{currentUser.username}</AvatarFallback>
                     </Avatar>
                     <div className="hidden md:block text-sm text-left">
                         <div className="font-medium leading-tight">{currentUser.name}</div>
@@ -84,7 +98,7 @@ export default function UserDropdown() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setIsProfileOpen(true)} className="cursor-pointer">
                         <Pencil className="mr-2 h-4 w-4" />
-                        <span>P rofile</span>
+                        <span>Profile</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={goSettings} className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />

@@ -1,43 +1,10 @@
 "use client"
 
-// ============================================
-// CART CONTEXT
-// ============================================
-// Global state management for shopping cart
-// Provides cart operations: add, remove, update, clear
+import type { CartItem } from "@/models/cart"
+import { CartContext } from "./CartContextType"
+import { useState, useEffect, type ReactNode } from "react"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
-
-/**
- * CartItem represents a single item in the shopping cart
- */
-export interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  options?: {
-    flavor?: string
-    size?: string
-  }
-  note?: string
-  image?: string
-}
-
-/**
- * CartContext interface defines all available cart operations
- */
-interface CartContextType {
-  items: CartItem[]
-  addItem: (item: Omit<CartItem, "id">) => void
-  removeItem: (id: string) => void
-  updateQuantity: (id: string, quantity: number) => void
-  clearCart: () => void
-  getTotalPrice: () => number
-  getTotalItems: () => number
-}
-
-const CartContext = createContext<CartContextType | undefined>(undefined)
+const CART_STORAGE_KEY = 'easyDining_cart'
 
 /**
  * CartProvider wraps the app and provides cart state to all components
@@ -45,12 +12,31 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([])
 
+  // Load cart from localStorage when component mounts
+  useEffect(() => {
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY)
+    if (savedCart) {
+      try {
+        const parsedCart = JSON.parse(savedCart)
+        setItems(parsedCart)
+      } catch (error) {
+        console.error('Failed to parse cart from localStorage:', error)
+        localStorage.removeItem(CART_STORAGE_KEY)
+      }
+    }
+  }, [])
+
+  // Save cart to localStorage whenever items change
+  useEffect(() => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
+  }, [items])
+
   /**
    * Add a new item to cart
    * Generates unique ID based on item properties and timestamp
    */
   const addItem = (item: Omit<CartItem, "id">) => {
-    const id = `${item.name}-${item.options?.flavor}-${item.options?.size}-${item.note || ""}-${Date.now()}`
+    const id = `${item.menuItemId}-${Date.now()}`
     setItems((prev) => [...prev, { ...item, id }])
   }
 
@@ -78,6 +64,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
    */
   const clearCart = () => {
     setItems([])
+    localStorage.removeItem(CART_STORAGE_KEY)
   }
 
   /**
@@ -109,16 +96,4 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </CartContext.Provider>
   )
-}
-
-/**
- * Custom hook to access cart context
- * Must be used within CartProvider
- */
-export const useCart = () => {
-  const context = useContext(CartContext)
-  if (!context) {
-    throw new Error("useCart must be used within a CartProvider")
-  }
-  return context
 }

@@ -9,8 +9,6 @@ public class Table : BaseEntity
     public string HashCode { get; private set; } = Guid.NewGuid().ToString("N");
     public int Seats { get; set; }
 
-    // One-to-many: a Table can have many orders
-    // public ICollection<Order>? Orders { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

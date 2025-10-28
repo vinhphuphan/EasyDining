@@ -10,25 +10,32 @@ namespace server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BaseApiController<T>(AppDbContext context) : ControllerBase where T : BaseEntity
+    public class BaseApiController<T> : ControllerBase where T : BaseEntity
     {
+        protected readonly AppDbContext _context;
+
+        // Thay đổi constructor để nhận AppDbContext trực tiếp
+        public BaseApiController(AppDbContext context)
+        {
+            _context = context;
+        }
+
         // GET: api/[controller]
         [HttpGet]
         public virtual async Task<ActionResult<IEnumerable<T>>> ListAllWithSpec(
         [FromQuery] string? search,
         [FromQuery] string? sort,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 30)
         {
             var spec = new BaseSpecification<T>
             {
-                Criteria = GetSearchCriteria(search),
                 OrderBy = BuildOrderBy(sort),
                 Skip = Math.Max(0, (page - 1)) * Math.Max(1, pageSize),
                 Take = Math.Max(1, pageSize)
             };
 
-            var query = context.Set<T>().AsQueryable();
+            var query = _context.Set<T>().AsQueryable();
             query = ApplySpecification(query, spec);
 
             var result = await query.ToListAsync();
@@ -39,7 +46,7 @@ namespace server.Controllers
         [HttpGet("{id:int}")]
         public virtual async Task<ActionResult<T>> GetById(int id)
         {
-            var entity = await context.Set<T>().FindAsync(id);
+            var entity = await _context.Set<T>().FindAsync(id);
             return (entity == null) ? NotFound(new { message = $"{typeof(T).Name} with ID {id} not found." }) : Ok(entity);
         }
 
@@ -47,8 +54,8 @@ namespace server.Controllers
         [HttpPost]
         public virtual async Task<ActionResult<T>> Create([FromBody] T entity)
         {
-            context.Set<T>().Add(entity);
-            await context.SaveChangesAsync();
+            _context.Set<T>().Add(entity);
+            await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, entity);
         }
 
@@ -57,8 +64,8 @@ namespace server.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] T entity)
         {
             if (entity.Id != id || !Exists(id)) return BadRequest();
-            context.Entry(entity).State = EntityState.Modified;
-            await context.SaveChangesAsync();
+            _context.Entry(entity).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
@@ -66,17 +73,17 @@ namespace server.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var entity = await context.Set<T>().FindAsync(id);
+            var entity = await _context.Set<T>().FindAsync(id);
             if (entity == null) return NotFound(new { message = $"{typeof(T).Name} with ID {id} not found." });
-            context.Set<T>().Remove(entity);
-            await context.SaveChangesAsync();
+            _context.Set<T>().Remove(entity);
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
         // Utility Method
-        private bool Exists(int id) => context.Set<T>().Any(e => e.Id == id);
+        private bool Exists(int id) => _context.Set<T>().Any(e => e.Id == id);
 
-        private static IQueryable<T> ApplySpecification(IQueryable<T> query, BaseSpecification<T> spec)
+        protected static IQueryable<T> ApplySpecification(IQueryable<T> query, BaseSpecification<T> spec)
         {
             if (spec.Criteria != null)
                 query = query.Where(spec.Criteria);
@@ -93,25 +100,8 @@ namespace server.Controllers
             return query;
         }
 
-        protected virtual Expression<Func<T, bool>>? GetSearchCriteria(string? search)
-        {
-            if (string.IsNullOrWhiteSpace(search)) return null;
 
-            // If entity has property "Name" , search by Name. Ortherwise, null.
-            var prop = typeof(T).GetProperty("Name");
-            if (prop == null || prop.PropertyType != typeof(string)) return null;
-
-            // Create the formula: e => e.Name.Contains(search)
-            var parameter = Expression.Parameter(typeof(T), "e");
-            var property = Expression.Property(parameter, prop);
-            var searchConst = Expression.Constant(search);
-            var contains = Expression.Call(property, nameof(string.Contains), null, searchConst);
-
-            return Expression.Lambda<Func<T, bool>>(contains, parameter);
-        }
-
-
-        private static Func<IQueryable<T>, IOrderedQueryable<T>> BuildOrderBy(string? sort)
+        protected static Func<IQueryable<T>, IOrderedQueryable<T>> BuildOrderBy(string? sort)
         {
             return query =>
             {
