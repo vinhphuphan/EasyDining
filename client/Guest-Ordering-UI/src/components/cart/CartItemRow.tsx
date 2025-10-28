@@ -33,9 +33,17 @@ export const CartItemRow = ({ item, onUpdateQuantity }: CartItemRowProps) => {
 
                     <div className="flex items-center gap-2 mt-2">
                         <button
-                            onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                            onClick={() => {
+                                const newQuantity = item.quantity - 1;
+                                if (newQuantity >= 0) {
+                                    onUpdateQuantity(item.id, newQuantity);
+                                }
+                            }}
                             className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
                             aria-label="Decrease quantity"
+                        >
+                            <Minus className="w-3.5 h-3.5" />
+                        </button>                            disabled={item.quantity <= 1}
                         >
                             <Minus className="w-3.5 h-3.5" />
                         </button>
@@ -54,6 +62,6 @@ export const CartItemRow = ({ item, onUpdateQuantity }: CartItemRowProps) => {
             <div className="text-sm font-semibold ml-4">
                 ${(item.price * item.quantity).toFixed(2)}
             </div>
-        </div>
+        </div >
     )
 }

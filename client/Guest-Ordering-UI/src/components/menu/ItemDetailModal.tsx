@@ -16,7 +16,7 @@ interface ItemDetailModalProps {
 }
 
 export const ItemDetailModal = ({ item, open, onClose, openCartDialog }: ItemDetailModalProps) => {
-  const { addItem } = useCart() // ✅ Đơn giản
+  const { addItem } = useCart()
   const [quantity, setQuantity] = useState<number>(1)
   const [note, setNote] = useState<string>("")
 

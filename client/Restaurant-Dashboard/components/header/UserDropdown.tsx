@@ -26,10 +26,12 @@ export default function UserDropdown() {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
-    const [currentUser, setCurrentUser] = useState<any>(null);
-
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    // Get user from localStorage when component mount
     // Get user from localStorage when component mount
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+
         const storedUser = localStorage.getItem("user")
         if (storedUser) {
             try {
@@ -43,20 +45,25 @@ export default function UserDropdown() {
 
     const handleLogout = async () => {
         try {
-            await fetch("/api/auth/logout", { method: "POST" })
+            const res = await fetch("/api/auth/logout", { method: "POST" })
+            if (res.ok) {
+                localStorage.removeItem("user")
+                toast.success("Logged out")
+                router.push("/login")
+            } else {
+                const data = await res.json().catch(() => ({}));
+                toast.error(data?.message || "Logout failed. Please try again.")
+            }
         } catch (error) {
-            console.log("Error when log out : ", error);
-        } finally {
-            localStorage.removeItem("user")
-            toast.success("Logged out")
-            router.push("/login")
+            console.error("Error when log out : ", error);
+            toast.error("Network error. Please try again.")
         }
     }
 
     const goSettings = () => router.push("/settings")
 
     if (!currentUser) {
-        // ⏳ Nếu chưa có user (VD: lúc page mới load)
+        // Return null while user data is loading
         return null
     }
 

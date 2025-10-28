@@ -18,6 +18,19 @@ public class AuthService(AppDbContext context, IConfiguration config) : IAuthSer
     // REGISTER
     public async Task<ServiceResult<object>> RegisterAsync(UserDto request)
     {
+        string[] ValidRoles = ["Admin", "User"];
+
+        bool IsValidRole(string? role) => ValidRoles.Contains(role);
+
+        if (string.IsNullOrWhiteSpace(request.Username) || request.Username.Length < 3)
+            return ServiceResult<object>.Fail("Username must be at least 3 characters");
+
+        if (string.IsNullOrWhiteSpace(request.PinCode) || request.PinCode.Length < 6)
+            return ServiceResult<object>.Fail("PIN must be at least 6 digits");
+
+        if (!IsValidRole(request.Role))
+            return ServiceResult<object>.Fail("Invalid role");
+
         if (await context.Users.AnyAsync(u => u.Username == request.Username))
             return ServiceResult<object>.Fail("Username already exists");
 
@@ -127,19 +140,32 @@ public class AuthService(AppDbContext context, IConfiguration config) : IAuthSer
 
     private string CreateToken(User user)
     {
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.Name, user.Username),
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Role, user.Role)
-        };
+        var tokenKey = config["AppSettings:Token"];
+        var issuer = config["AppSettings:Issuer"];
+        var audience = config["AppSettings:Audience"];
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["AppSettings:Token"]!));
+        if (string.IsNullOrEmpty(tokenKey) || tokenKey.Length < 32)
+            throw new InvalidOperationException("AppSettings:Token must be at least 32 characters");
+
+        if (string.IsNullOrEmpty(issuer))
+            throw new InvalidOperationException("AppSettings:Issuer is required");
+
+        if (string.IsNullOrEmpty(audience))
+            throw new InvalidOperationException("AppSettings:Audience is required");
+
+        var claims = new List<Claim>
+    {
+        new(ClaimTypes.Name, user.Username),
+        new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new(ClaimTypes.Role, user.Role)
+    };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
 
         var tokenDescriptor = new JwtSecurityToken(
-            issuer: config["AppSettings:Issuer"],
-            audience: config["AppSettings:Audience"],
+            issuer: issuer,
+            audience: audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(15),
             signingCredentials: creds
