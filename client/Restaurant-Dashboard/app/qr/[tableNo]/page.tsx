@@ -44,3 +44,73 @@ const TableQrPage = () => {
 };
 
 export default TableQrPage;
+"use client"
+
+import { useEffect, useMemo } from "react"
+import { useSearchParams } from "next/navigation"
+import { Button } from "@/components/ui/button"
+
+type Props = { params: { tableNo: string } }
+
+export default function QRPage({ params }: Props) {
+  const searchParams = useSearchParams()
+  const auto = searchParams.get("auto")
+
+  const tableNo = decodeURIComponent(params.tableNo ?? "").trim()
+
+  // Target URL for guests to order
+  const orderUrl = useMemo(() => {
+    return `https://order.easydining.com/table=${encodeURIComponent(tableNo)}`
+  }, [tableNo])
+
+  const qrSrc = useMemo(() => {
+    const size = "280x280"
+    return `https://api.qrserver.com/v1/create-qr-code/?size=${size}&data=${encodeURIComponent(orderUrl)}`
+  }, [orderUrl])
+
+  useEffect(() => {
+    if (auto) {
+      // Defer print slightly to ensure image is rendered
+      const id = setTimeout(() => window.print(), 300)
+      return () => clearTimeout(id)
+    }
+  }, [auto])
+
+  return (
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-md mx-auto">
+        <div className="rounded-2xl border bg-card text-card-foreground shadow p-6 flex flex-col items-center">
+          <div className="w-full flex items-center justify-between mb-4">
+            <div className="text-lg font-semibold">EasyDining</div>
+            <div className="text-lg font-semibold">Bàn {tableNo}</div>
+          </div>
+
+          <img className="w-[280px] h-[280px]" src={qrSrc} alt={`QR cho bàn ${tableNo}`} />
+
+          <div className="mt-3 text-sm text-muted-foreground text-center">
+            Quét mã để đặt món tại bàn này
+          </div>
+          <a
+            className="mt-2 text-sm text-primary break-all"
+            href={orderUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {orderUrl}
+          </a>
+
+          <div className="mt-5 print:hidden">
+            <Button size="sm" onClick={() => window.print()}>Print</Button>
+          </div>
+        </div>
+      </div>
+
+      <style jsx global>{`
+        @media print {
+          .print\\:hidden { display: none !important; }
+          body { background: #fff !important; }
+        }
+      `}</style>
+    </div>
+  )
+}
