@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         "Set-Cookie",
         serialize("accessToken", accessToken, {
             httpOnly: true,
-            secure: true,
+            secure: process.env.NODE_ENV === 'production',
             sameSite: "lax",
             path: "/",
             maxAge: 60 * 15, // 15 phút
@@ -40,10 +40,21 @@ export async function POST(req: Request) {
         "Set-Cookie",
         serialize("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: true,
+            secure: process.env.NODE_ENV === 'production',
             sameSite: "lax",
             path: "/",
             maxAge: 60 * 60 * 24 * 7, // 7 ngày
+        })
+    );
+
+    response.headers.append(
+        "Set-Cookie",
+        serialize("uid", String(user.id), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24 * 7,
         })
     );
 

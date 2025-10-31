@@ -27,7 +27,7 @@ export default function UserDropdown() {
     const [open, setOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
     const [currentUser, setCurrentUser] = useState<User | null>(null);
-    // Get user from localStorage when component mount
+
     // Get user from localStorage when component mount
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -45,7 +45,7 @@ export default function UserDropdown() {
 
     const handleLogout = async () => {
         try {
-            const res = await fetch("/api/auth/logout", { method: "POST" })
+            const res = await fetch("/api/logout", { method: "POST" })
             if (res.ok) {
                 localStorage.removeItem("user")
                 toast.success("Logged out")

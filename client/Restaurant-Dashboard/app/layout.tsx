@@ -12,6 +12,7 @@ import { Toaster } from "sonner"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { AuthProvider } from "@/context/AuthContext";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
+import TokenRefresher from "@/components/providers/TokenRefresher";
 
 
 export const metadata: Metadata = {
@@ -29,12 +30,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-      <body>
+      <body suppressHydrationWarning>
         <ReduxProvider>
           <ErrorBoundary>
             <AuthProvider>
               <CreateOrderModalProvider>
                 <Header />
+                <TokenRefresher />
                 <Suspense fallback={null}>{children}</Suspense>
                 <CreateOrderModalRenderer />
               </CreateOrderModalProvider>

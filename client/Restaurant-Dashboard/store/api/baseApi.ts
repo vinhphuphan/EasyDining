@@ -1,20 +1,23 @@
-import { fetchBaseQuery, type BaseQueryApi, type FetchArgs } from "@reduxjs/toolkit/query";
+import { fetchBaseQuery, type BaseQueryApi, type FetchArgs } from "@reduxjs/toolkit/query"
 
 const customBaseQuery = fetchBaseQuery({
-    baseUrl: 'https://localhost:7184/api'
-});
+    baseUrl: "/api",
+    credentials: "include",
+})
 
-const sleep = () => new Promise(resolve => setTimeout(resolve, 1000));
+// Giữ tối giản như cũ
+const sleep = () => new Promise((r) => setTimeout(r, 1000))
 
-export const baseQueryWithErrorHandling = async (agrs: string | FetchArgs, api: BaseQueryApi,
-    extraOptions: object) => {
-    // start loading
-    await sleep();
-    const result = await customBaseQuery(agrs, api, extraOptions);
-    // stop loading
+export const baseQueryWithErrorHandling = async (
+    args: string | FetchArgs,
+    api: BaseQueryApi,
+    extraOptions: object
+) => {
+    await sleep()
+    const result = await customBaseQuery(args, api, extraOptions)
     if (result.error) {
-        const { status, data } = result.error;
+        const { status, data } = result.error
         console.log({ status, data })
     }
-    return result;
-};
+    return result
+}

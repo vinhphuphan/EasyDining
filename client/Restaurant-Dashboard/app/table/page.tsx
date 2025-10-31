@@ -11,31 +11,21 @@ export default function TablePage() {
   const { data: tables, isLoading, isError, refetch } = useGetTablesQuery()
 
   const statusClass = (status: TableDto["status"]) => {
-    if (status === "Available") return "border-muted-foreground/20 bg-background hover:border-muted-foreground/40"
+    if (status === "Available") return "border-muted-foreground/20 bg-neutral-100 hover:border-muted-foreground/40"
     if (status === "Occupied") return "border-orange-500 bg-orange-500 text-white"
     return "border-primary bg-primary text-background" // Reserved
   }
 
-  const toQr = (hashCode: string) => {
-    // Navigate to QR page carrying table hashCode
-    router.push(`/qr/${hashCode}`)
-  }
-
-  const toQrPrint = (hashCode: string) => {
-    // Open QR page in a new tab and trigger auto print
-    if (typeof window !== "undefined") {
-      window.open(`/qr/${hashCode}?auto=1`, "_blank", "noopener,noreferrer")
-    }
-  }
+  const toQr = (hashCode: string) => router.push(`/qr/${hashCode}`)
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="p-6">
+      <main className="px-6 py-4">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-6 w-6" />
-              <h1 className="text-2xl font-semibold">Table</h1>
+              <h1 className="text-xl font-semibold">Table</h1>
             </div>
 
             <div className="flex items-center gap-4 ml-8">
@@ -72,25 +62,34 @@ export default function TablePage() {
               className={`group relative aspect-square rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${statusClass(t.status)}`}
             >
               {/* Controls */}
-              <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100">
+              <div className="absolute top-3 right-3 flex gap-2 opacity-100">
                 <button
                   onClick={(e) => { e.stopPropagation(); toQr(t.hashCode) }}
-                  className="p-1 rounded bg-white/20 hover:bg-white/30"
+                  className={`p-1 rounded transition-colors
+                    ${t.status === "Available"
+                      ? "bg-gray-200 hover:bg-gray-300 text-gray-700 transition"
+                      : "bg-white/20 hover:bg-white/30 text-white transition"}
+                  `}
                   title="QR code"
                 >
                   <QrCode className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={(e) => { e.stopPropagation(); toQrPrint(t.hashCode) }}
-                  className="p-1 rounded bg-white/20 hover:bg-white/30"
-                  title="Print QR"
+                  className={`p-1 rounded transition-colors
+                  ${t.status === "Available"
+                      ? "bg-gray-200 hover:bg-gray-300 text-gray-700 transition"
+                      : "bg-white/20 hover:bg-white/30 text-white transition"}`}
+                  title="Edit (coming soon)"
                 >
-                  <Printer className="h-4 w-4" />
-                </button>
-                <button className="p-1 rounded bg-white/20 hover:bg-white/30 cursor-pointer transition-colors" title="Edit (coming soon)">
                   <Pencil className="h-4 w-4" />
                 </button>
-                <button className="p-1 rounded bg-red-600 hover:bg-red-700 text-white cursor-pointer transition-colors" title="Delete (coming soon)">
+                <button
+                  className={`p-1 rounded transition-colors
+                  ${t.status === "Available"
+                      ? "bg-gray-200 hover:bg-red-600 text-gray-700 hover:text-white transition"
+                      : "bg-white/20 hover:bg-red-600 text-white transition"}`}
+                  title="Delete (coming soon)"
+                >
                   <Trash className="h-4 w-4" />
                 </button>
               </div>

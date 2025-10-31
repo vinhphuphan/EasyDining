@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.Entities;
 using server.Specifications;
-using System.Linq.Expressions;
 
 namespace server.Controllers
 
@@ -14,12 +14,12 @@ namespace server.Controllers
     {
         protected readonly AppDbContext _context;
 
-        // Thay đổi constructor để nhận AppDbContext trực tiếp
         public BaseApiController(AppDbContext context)
         {
             _context = context;
         }
 
+        [AllowAnonymous]
         // GET: api/[controller]
         [HttpGet]
         public virtual async Task<ActionResult<IEnumerable<T>>> ListAllWithSpec(
@@ -42,6 +42,7 @@ namespace server.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         // GET: api/[controller]/5
         [HttpGet("{id:int}")]
         public virtual async Task<ActionResult<T>> GetById(int id)
@@ -50,6 +51,7 @@ namespace server.Controllers
             return (entity == null) ? NotFound(new { message = $"{typeof(T).Name} with ID {id} not found." }) : Ok(entity);
         }
 
+        [Authorize]
         // POST: api/[controller]
         [HttpPost]
         public virtual async Task<ActionResult<T>> Create([FromBody] T entity)
@@ -59,6 +61,7 @@ namespace server.Controllers
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, entity);
         }
 
+        [Authorize]
         // PUT: api/[controller]/5
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] T entity)
@@ -69,6 +72,7 @@ namespace server.Controllers
             return NoContent();
         }
 
+        [Authorize]
         // DELETE: api/[controller]/5
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)

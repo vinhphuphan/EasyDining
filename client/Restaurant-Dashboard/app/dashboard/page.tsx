@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CreditCard, Clock, CheckCircle, FileText, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -10,8 +10,10 @@ import { EmptyState } from "@/components/empty-state"
 import { NotificationPanel } from "@/components/notification-panel"
 import { orders, tables, menuItems } from "@/lib/mock-data"
 import { useCreateOrderModal } from "@/context/CreateOrderModalProvider"
+import { useRouter } from "next/navigation"
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [selectedFloor, setSelectedFloor] = useState("First Floor")
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [showFloorDropdown, setShowFloorDropdown] = useState(false)
@@ -34,6 +36,12 @@ export default function DashboardPage() {
   const outOfStockItems = menuItems.filter((m) => m.stockStatus === "out-of-stock")
 
   const floors = Array.from(new Set(tables.map((t) => t.floor)))
+
+  useEffect(() => {
+    // fail-fast UI if no user found
+    const hasUser = !!localStorage.getItem('user')
+    if (!hasUser) router.replace('/login')
+  }, [router])
 
   return (
     <div className="min-h-screen bg-background">

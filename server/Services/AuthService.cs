@@ -116,9 +116,9 @@ public class AuthService(AppDbContext context, IConfiguration config) : IAuthSer
     }
 
     // LOGOUT
-    public async Task<ServiceResult<bool>> LogoutAsync(string UserId)
+    public async Task<ServiceResult<bool>> LogoutAsync(string userId)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id.ToString() == UserId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id.ToString() == userId);
         if (user is null)
             return ServiceResult<bool>.Fail("User not found");
 

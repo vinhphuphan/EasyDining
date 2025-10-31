@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
@@ -9,10 +10,11 @@ namespace server.Controllers
     [ApiController]
     public class MenuItemsController : BaseApiController<MenuItem>
     {
-         public MenuItemsController(AppDbContext context) : base(context)
+        public MenuItemsController(AppDbContext context) : base(context)
         {
         }
 
+        [AllowAnonymous]
         [HttpGet("categories")]
         public async Task<ActionResult<IEnumerable<string>>> GetCategoriesAsync()
         {
@@ -21,7 +23,7 @@ namespace server.Controllers
                 .Select(m => m.Category)
                 .Distinct()
                 .ToListAsync();
-            
+
             return Ok(categories);
         }
     }

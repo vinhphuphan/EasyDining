@@ -41,12 +41,11 @@ export const CartItemRow = ({ item, onUpdateQuantity }: CartItemRowProps) => {
                             }}
                             className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
                             aria-label="Decrease quantity"
-                        >
-                            <Minus className="w-3.5 h-3.5" />
-                        </button>                            disabled={item.quantity <= 1}
+                            disabled={item.quantity <= 1}
                         >
                             <Minus className="w-3.5 h-3.5" />
                         </button>
+
                         <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
                         <button
                             onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}

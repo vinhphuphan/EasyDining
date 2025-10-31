@@ -8,5 +8,5 @@ public interface IAuthService
     Task<ServiceResult<object>> RegisterAsync(UserDto request);
     Task<ServiceResult<object>> LoginAsync(LoginDto request);
     Task<ServiceResult<object>> RefreshTokenAsync(RefreshTokenDto tokenDto);
-    Task<ServiceResult<bool>> LogoutAsync(string UserId);
+    Task<ServiceResult<bool>> LogoutAsync(string userId);
 }
