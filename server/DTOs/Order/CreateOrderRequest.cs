@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace server.DTOs;
+namespace server.DTOs.Order;
 
 public class CreateOrderRequest
 {
@@ -11,7 +11,7 @@ public class CreateOrderRequest
     public string BuyerName { get; set; } = string.Empty;
 
     [EmailAddress]
-    public string BuyerEmail { get; set; } = string.Empty;
+    public string? BuyerEmail { get; set; }
 
     [Required, MinLength(1)]
     public List<CreateOrderItemRequest> Items { get; set; } = [];

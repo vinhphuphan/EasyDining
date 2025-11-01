@@ -15,8 +15,26 @@ namespace server.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet]
+        public override async Task<ActionResult<IEnumerable<MenuItem>>> ListAllWithSpec(
+        [FromQuery] string? search,
+        [FromQuery] string? sort,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 30)
+        {
+            return await base.ListAllWithSpec(search, sort, page, pageSize);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{id:int}")]
+        public override async Task<ActionResult<MenuItem>> GetById(int id)
+        {
+            return await base.GetById(id);
+        }
+
+        [AllowAnonymous]
         [HttpGet("categories")]
-        public async Task<ActionResult<IEnumerable<string>>> GetCategoriesAsync()
+        public async Task<ActionResult<IEnumerable<string>>> GetCategoriesAsync(int id)
         {
             var categories = await _context.MenuItems
                 .Where(m => !string.IsNullOrEmpty(m.Category))

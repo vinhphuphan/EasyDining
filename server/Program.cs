@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -11,9 +12,8 @@ using server.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -21,7 +21,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-// CORS for frontend apps (Vite and Next.js dev servers)
 const string CorsPolicy = "CorsPolicy";
 builder.Services.AddCors(options =>
 {

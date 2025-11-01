@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
-using server.DTOs;
+using server.DTOs.Order;
+using server.Entities;
 using server.Entities.OrderAggregate;
 using server.Helpers;
 
@@ -13,20 +14,16 @@ namespace server.Controllers;
 public class OrdersController(AppDbContext context) : ControllerBase
 {
     // GET /api/orders
-    [Authorize]
     [HttpGet]
-    public async Task<ActionResult<ServiceResult<PagedList<Order>>>> GetOrders(
+    [Authorize]
+    public async Task<ActionResult<ServiceResult<PagedList<OrderDto>>>> GetOrders(
     [FromQuery] string? tableCode,
     [FromQuery] OrderStatus? status,
     [FromQuery] int page = 1,
     [FromQuery] int pageSize = 20
     )
     {
-        var query = context.Orders
-            .Include(o => o.OrderItems)
-            .ThenInclude(oi => oi.ItemOrdered)
-            .OrderByDescending(o => o.OrderDate)
-            .AsQueryable();
+        var query = context.Orders.OrderByDescending(o => o.OrderDate).AsQueryable();
 
         if (!string.IsNullOrEmpty(tableCode))
             query = query.Where(o => o.TableCode == tableCode);
@@ -36,52 +33,58 @@ public class OrdersController(AppDbContext context) : ControllerBase
 
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 100);
-        query = query.AsNoTracking();
 
         var totalCount = await query.CountAsync();
         var orders = await query
+            .AsNoTracking()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .ProjectToDto()
             .ToListAsync();
 
-        return Ok(ServiceResult<PagedList<Order>>.Ok(
-            new PagedList<Order>(orders, totalCount, page, pageSize)
+        return Ok(ServiceResult<PagedList<OrderDto>>.Ok(
+            new PagedList<OrderDto>(orders, totalCount, page, pageSize)
         ));
     }
 
+
     // GET /api/orders/{id}
-    [Authorize]
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<ServiceResult<Order>>> GetOrderById(int id)
+    [Authorize]
+    public async Task<ActionResult<ServiceResult<OrderDto>>> GetOrderById(int id)
     {
         var order = await context.Orders
-            .AsNoTracking() // do not track entity
-            .Include(o => o.OrderItems)
-            .ThenInclude(oi => oi.ItemOrdered)
-            .FirstOrDefaultAsync(o => o.Id == id);
+            .Where(o => o.Id == id)
+            .AsNoTracking()
+            .ProjectToDto()
+            .FirstOrDefaultAsync();
 
         if (order is null)
-            return NotFound(ServiceResult<Order>.Fail("Order not found"));
+            return NotFound(ServiceResult<OrderDto>.Fail("Order not found"));
 
-        return Ok(ServiceResult<Order>.Ok(order));
+        return Ok(ServiceResult<OrderDto>.Ok(order));
     }
 
-    // PUT /api/orders/update-status
-    [Authorize]
-    [HttpPatch("{id:int}/status")]
-    public async Task<ActionResult<ServiceResult<Order>>> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDto dto)
+    [HttpPut("update-status")]
+    public async Task<ActionResult> UpdateOrderStatus(UpdateOrderStatusDto dto)
     {
-        var order = await context.Orders.FindAsync(id);
+        if (!Enum.TryParse<OrderStatus>(dto.Status, true, out var newStatus))
+        {
+            var validStatuses = string.Join(", ", Enum.GetNames<OrderStatus>());
+            return BadRequest(new
+            {
+                message = $"Invalid status '{dto.Status}'. Valid statuses: {validStatuses}"
+            });
+        }
 
+        var order = await context.Orders.FindAsync(dto.OrderId);
         if (order is null)
-            return NotFound(ServiceResult<Order>.Fail("Order not found"));
+            return NotFound(new { message = "Order not found" });
 
-        order.OrderStatus = dto.Status;
-        var success = await context.SaveChangesAsync() > 0;
+        order.OrderStatus = newStatus;
+        await context.SaveChangesAsync();
 
-        if (!success) return BadRequest(ServiceResult<Order>.Fail("Failed to update order status"));
-
-        return Ok(ServiceResult<Order>.Ok(order, "Order status updated successfully!"));
+        return Ok(new { message = $"Order status changed to {newStatus}" });
     }
 
     // POST /api/orders
@@ -92,12 +95,9 @@ public class OrdersController(AppDbContext context) : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ServiceResult<Order>.Fail("Invalid order data"));
 
         // Validate table exists
-        var tableExists = await context.Tables
-            .AsNoTracking()
-            .AnyAsync(t => t.HashCode == request.TableCode);
+        var table = await context.Tables.FirstOrDefaultAsync(t => t.TableCode == request.TableCode);
 
-        if (!tableExists)
-            return BadRequest(ServiceResult<Order>.Fail("Invalid table code"));
+        if (table is null) return BadRequest(new { message = "Invalid table code" });
 
         // Extract all menu item IDs from the request
         var menuItemIds = request.Items.Select(x => x.MenuItemId).ToList();
@@ -116,7 +116,7 @@ public class OrdersController(AppDbContext context) : ControllerBase
 
         // If any menu IDs are invalid, return a failure response
         if (missing.Count > 0)
-            return BadRequest(ServiceResult<Order>.Fail("One or more menu items are invalid"));
+            return BadRequest(ServiceResult<Order>.Fail($"Invalid menu item ids: {string.Join(", ", missing)}"));
 
         var orderItems = new List<OrderItem>();
         decimal subtotal = 0;
@@ -153,7 +153,7 @@ public class OrdersController(AppDbContext context) : ControllerBase
         {
             TableCode = request.TableCode,
             BuyerName = request.BuyerName,
-            BuyerEmail = request.BuyerEmail,
+            BuyerEmail = request.BuyerEmail ?? string.Empty,
             OrderItems = orderItems,
             Subtotal = subtotal,
             Discount = 0,
@@ -163,6 +163,8 @@ public class OrdersController(AppDbContext context) : ControllerBase
 
         context.Orders.Add(order);
 
+        if (table.Status == TableStatus.Available) table.Status = TableStatus.Occupied;
+
         var success = await context.SaveChangesAsync() > 0;
 
         if (!success)
@@ -170,16 +172,21 @@ public class OrdersController(AppDbContext context) : ControllerBase
             return BadRequest(ServiceResult<Order>.Fail("Failed to create order"));
         }
 
+        var created = await context.Orders
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.ItemOrdered)
+                    .FirstAsync(o => o.Id == order.Id);
+
         return CreatedAtAction(
             nameof(GetOrderById),
             new { id = order.Id },
-            ServiceResult<Order>.Ok(order, "Order created successfully"
-        ));
+            ServiceResult<OrderDto>.Ok(created.ToDto(), "Order created successfully")
+        );
     }
 
     // Put /api/orders/{id}
-    [Authorize]
     [HttpPut("{id:int}")]
+    [Authorize]
     public async Task<ActionResult<ServiceResult<Order>>> UpdateOrder(int id, [FromBody] UpdateOrderDto dto)
     {
         var order = await context.Orders.FindAsync(id);
@@ -193,11 +200,11 @@ public class OrdersController(AppDbContext context) : ControllerBase
         var success = await context.SaveChangesAsync() > 0;
         if (!success) return BadRequest(ServiceResult<Order>.Fail("Failed to update order"));
 
-        return Ok(ServiceResult<Order>.Ok(order, "Order updated successfully"));
+        return Ok(ServiceResult<OrderDto>.Ok(order.ToDto(), "Order updated successfully"));
     }
 
-    [Authorize]
     [HttpDelete("{id:int}")]
+    [Authorize]
     public async Task<ActionResult<ServiceResult<string>>> DeleteOrder(int id)
     {
         var order = await context.Orders

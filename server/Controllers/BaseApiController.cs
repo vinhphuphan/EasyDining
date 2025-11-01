@@ -9,6 +9,7 @@ namespace server.Controllers
 
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class BaseApiController<T> : ControllerBase where T : BaseEntity
     {
@@ -19,7 +20,6 @@ namespace server.Controllers
             _context = context;
         }
 
-        [AllowAnonymous]
         // GET: api/[controller]
         [HttpGet]
         public virtual async Task<ActionResult<IEnumerable<T>>> ListAllWithSpec(
@@ -42,7 +42,6 @@ namespace server.Controllers
             return Ok(result);
         }
 
-        [AllowAnonymous]
         // GET: api/[controller]/5
         [HttpGet("{id:int}")]
         public virtual async Task<ActionResult<T>> GetById(int id)
@@ -51,7 +50,6 @@ namespace server.Controllers
             return (entity == null) ? NotFound(new { message = $"{typeof(T).Name} with ID {id} not found." }) : Ok(entity);
         }
 
-        [Authorize]
         // POST: api/[controller]
         [HttpPost]
         public virtual async Task<ActionResult<T>> Create([FromBody] T entity)
@@ -61,10 +59,9 @@ namespace server.Controllers
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, entity);
         }
 
-        [Authorize]
         // PUT: api/[controller]/5
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] T entity)
+        public virtual async Task<IActionResult> Update(int id, [FromBody] T entity)
         {
             if (entity.Id != id || !Exists(id)) return BadRequest();
             _context.Entry(entity).State = EntityState.Modified;
@@ -72,10 +69,9 @@ namespace server.Controllers
             return NoContent();
         }
 
-        [Authorize]
         // DELETE: api/[controller]/5
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        public virtual async Task<IActionResult> Delete(int id)
         {
             var entity = await _context.Set<T>().FindAsync(id);
             if (entity == null) return NotFound(new { message = $"{typeof(T).Name} with ID {id} not found." });

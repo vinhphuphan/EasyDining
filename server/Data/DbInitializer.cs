@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.Entities;
 
@@ -186,45 +187,39 @@ public class DbInitializer
             context.SaveChanges();
         }
 
-        // // ===== Employees =====
-        // if (!context.Employees.Any())
-        // {
-        //     var employees = new List<Employee>
-        // {
-        //     new() {
-        //         Name = "Richardo Wilson",
-        //         Email = "richardo.wilson@gmail.com",
-        //         PinCode = "123456",
-        //         Role = "User",
-        //         Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/professional-man.jpg",
-        //         ShiftStart =TimeSpan.Parse("10:00:00"),
-        //         ShiftEnd = TimeSpan.Parse("14:00:00")
-        //         },
-        //     new() {
-        //         Name = "Orlando",
-        //         Email = "orlando@easydining.com",
-        //         PinCode = "234567",
-        //         Role = "User",
-        //         Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/young-waiter.jpg", ShiftStart = TimeSpan.Parse("14:00:00"), ShiftEnd = TimeSpan.Parse("18:00:00")
-        //         },
-        //     new() {
-        //         Name = "Eve",
-        //         Email = "eve@easydining.com",
-        //         PinCode = "345678",
-        //         Role = "User",
-        //         Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/user-03.jpg", ShiftStart = TimeSpan.Parse("18:00:00"), ShiftEnd = TimeSpan.Parse("22:00:00")
-        //         }
-        //     };
-        //     context.Employees.AddRange(employees);
-        //     context.SaveChanges();
-        // }
+        // // ===== User =====
+        if (!context.Users.Any())
+        {
+            var hasher = new PasswordHasher<User>();
+
+            var admin = new User
+            {
+                Username = "admin",
+                Email = "admin@easydining.com",
+                Role = "Admin"
+            };
+
+            admin.PinCodeHash = hasher.HashPassword(admin, "123456");
+
+            var staff = new User
+            {
+                Username = "staff",
+                Email = "staff@easydining.com",
+                Role = "Staff"
+            };
+
+            staff.PinCodeHash = hasher.HashPassword(staff, "111111");
+
+            context.Users.AddRange(admin, staff);
+            context.SaveChanges();
+        }
 
         // ===== Tables =====
         if (!context.Tables.Any())
         {
             context.Tables.AddRange(
                 new Table { Name = "A1", Seats = 4, Status = TableStatus.Available },
-                new Table { Name = "A2", Seats = 2, Status = TableStatus.Reserved },
+                new Table { Name = "A2", Seats = 2, Status = TableStatus.Available },
                 new Table { Name = "A3", Seats = 2, Status = TableStatus.Occupied },
                 new Table { Name = "A4", Seats = 2, Status = TableStatus.Available },
                 new Table { Name = "A5", Seats = 2, Status = TableStatus.Available },

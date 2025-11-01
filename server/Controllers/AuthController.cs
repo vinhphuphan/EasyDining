@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using server.DTOs;
@@ -11,6 +10,7 @@ namespace server.Controllers;
 [ApiController]
 public class AuthController(IAuthService authService) : ControllerBase
 {
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] UserDto request)
     {
@@ -18,6 +18,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto request)
     {
@@ -25,6 +26,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
+    [AllowAnonymous]
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto tokenDto)
     {

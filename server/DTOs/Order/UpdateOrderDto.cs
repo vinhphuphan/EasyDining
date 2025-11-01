@@ -1,6 +1,6 @@
 using System;
 
-namespace server.DTOs;
+namespace server.DTOs.Order;
 
 public class UpdateOrderDto
 {

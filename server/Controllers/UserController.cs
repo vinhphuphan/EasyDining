@@ -10,9 +10,6 @@ namespace server.Controllers
     [Authorize(Roles = "Admin")]
     public class UserController : BaseApiController<User>
     {
-        public UserController(AppDbContext context) : base(context)
-        {
-
-        }
+        public UserController(AppDbContext context) : base(context) { }
     }
 }
