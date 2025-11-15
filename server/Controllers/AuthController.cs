@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using server.DTOs;
+using server.DTOs.Auth;
 using server.Helpers;
 using server.Interfaces;
 

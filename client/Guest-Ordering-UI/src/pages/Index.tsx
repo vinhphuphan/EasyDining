@@ -1,33 +1,49 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
-import { ClipboardList, ChevronDown, ChevronUp } from "lucide-react"
+import { ClipboardList, ChevronDown, ChevronUp, Check } from "lucide-react"
 import type { MenuItem } from "@/models/menuItem"
 import { Header, HeaderBanner } from "@/components/header/Header"
 import { useCategories, useMenu } from "@/hooks/useMenu"
 import { CategoryNav } from "@/components/header/CategoryNav"
 import { MenuItemCard } from "@/components/menu/MenuItemCard"
 import { Cart } from "@/components/cart/Cart"
+import { SuccessOrderToast } from "@/components/notifications/SuccessOrderToast"
 import OrdersModal from "@/components/OrdersModal"
 import { ItemDetailModal } from "@/components/menu/ItemDetailModal"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import type { Order } from "@/models/order"
+import { Badge } from "@/components/ui/badge"
+import { useLazyVerifyTableQuery } from "@/api/tableApi"
 
 const Index = () => {
-  // State management
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [cartModalOpen, setCartModalOpen] = useState(false)
   const [ordersModalOpen, setOrdersModalOpen] = useState(false)
+  const [recentOrder, setRecentOrder] = useState<Order | null>(null)
+  const [successToast, setSuccessToast] = useState<{
+    amount: number
+    orderId: number
+    date: string
+    receiptEmail?: string
+  } | null>(null)
 
   // API calls
   const { menuItems, isLoading: menuLoading, error: menuError } = useMenu();
   const { categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
+  const [verifyTable, { data, isFetching, error }] = useLazyVerifyTableQuery()
   const [activeCategory, setActiveCategory] = useState<string>("")
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({})
 
-
   const categoryRefs = useRef<{ [key: string]: HTMLElement | null }>({})
   const isScrollingToCategory = useRef(false)
+
+  const searchParams = new URLSearchParams(window.location.search)
+  const code = searchParams.get("code") || "AAJ3Y4"
+  useEffect(() => {
+    verifyTable(code)
+  }, [verifyTable, code])
 
   useEffect(() => {
     if (categories.length > 0 && Object.keys(openCategories).length === 0) {
@@ -40,9 +56,7 @@ const Index = () => {
     }
   }, [categories, openCategories])
 
-  /**
-   * Scroll spy effect - updates active category based on scroll position
-   */
+  // Scroll spy effect - updates active category based on scroll position
   useEffect(() => {
     const handleScroll = () => {
       if (isScrollingToCategory.current) return
@@ -96,11 +110,11 @@ const Index = () => {
 
 
   // Loading state
-  if (menuLoading || categoriesLoading) {
+  if (menuLoading || categoriesLoading || isFetching) {
     return (
       <div className="min-h-screen bg-background">
         <Header onCartClick={() => setCartModalOpen(true)} />
-        <HeaderBanner />
+        <HeaderBanner verifyTable={data} />
         <div className="flex justify-center items-center h-64">
           <Button disabled size="lg">
             <Spinner />
@@ -112,11 +126,11 @@ const Index = () => {
   }
 
   // Error state
-  if (menuError || categoriesError) {
+  if (menuError || categoriesError || error) {
     return (
       <div className="min-h-screen bg-background">
         <Header onCartClick={() => setCartModalOpen(true)} />
-        <HeaderBanner />
+        <HeaderBanner verifyTable={data} />
         <div className="flex justify-center items-center h-64">
           <div className="text-lg text-black">
             Error loading menu. Please try again.
@@ -130,7 +144,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header with cart button */}
       <Header onCartClick={() => setCartModalOpen(true)} />
-      <HeaderBanner />
+      <HeaderBanner verifyTable={data} />
       {/* Category navigation */}
       <CategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} categories={categories} />
       {/* Main content area - continuous scroll */}
@@ -178,6 +192,11 @@ const Index = () => {
         aria-label="View orders"
       >
         <ClipboardList className="w-6 h-6" />
+        {recentOrder && (
+          <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 rounded-full bg-primary text-white border-0 flex items-center justify-center">
+            <Check className="w-3 h-3" />
+          </Badge>
+        )}
       </button>
       {/* Item detail modal */}
       <ItemDetailModal
@@ -187,8 +206,37 @@ const Index = () => {
         openCartDialog={() => setCartModalOpen(true)}
       />
       {/* Cart modal */}
-      <Cart open={cartModalOpen} onClose={() => setCartModalOpen(false)} />
-      <OrdersModal isOpen={ordersModalOpen} onClose={() => setOrdersModalOpen(false)} />
+      <Cart
+        open={cartModalOpen}
+        onClose={() => setCartModalOpen(false)}
+        onOrderSuccess={(data) => {
+          setSuccessToast({
+            amount: data.amount,
+            orderId: data.orderId,
+            date: data.date,
+            receiptEmail: data.receiptEmail,
+          })
+          setRecentOrder(data.order)
+          setCartModalOpen(false)
+        }}
+        tableCode={code}
+      />
+      {/* Success toast */}
+      <SuccessOrderToast
+        open={!!successToast}
+        onClose={() => setSuccessToast(null)}
+        amount={successToast?.amount ?? 0}
+        orderId={successToast?.orderId ?? 0}
+        date={successToast?.date ?? new Date().toISOString()}
+        receiptEmail={successToast?.receiptEmail}
+      />
+      <OrdersModal
+        isOpen={ordersModalOpen}
+        onClose={() => {
+          setOrdersModalOpen(false)
+        }}
+        order={recentOrder}
+      />
     </div>
   )
 }

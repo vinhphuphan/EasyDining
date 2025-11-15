@@ -5,14 +5,15 @@ import { GeistMono } from 'geist/font/mono';
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
-import Header from "@/components/header/Header"
+import Header from "@/components/header/header"
 import { CreateOrderModalProvider } from "@/context/CreateOrderModalProvider"
 import CreateOrderModalRenderer from "@/components/modals/create-order-modal-renderer"
 import { Toaster } from "sonner"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { AuthProvider } from "@/context/AuthContext";
-import { ReduxProvider } from "@/components/providers/ReduxProvider";
-import TokenRefresher from "@/components/providers/TokenRefresher";
+import { ReduxProvider } from "@/components/providers/redux-provider";
+import TokenRefresher from "@/components/providers/token-fresher";
+import { SuccessOrderToastProvider } from "@/context/SuccessOrderToastProvider";
 
 
 export const metadata: Metadata = {
@@ -34,12 +35,14 @@ export default function RootLayout({
         <ReduxProvider>
           <ErrorBoundary>
             <AuthProvider>
-              <CreateOrderModalProvider>
-                <Header />
-                <TokenRefresher />
-                <Suspense fallback={null}>{children}</Suspense>
-                <CreateOrderModalRenderer />
-              </CreateOrderModalProvider>
+              <SuccessOrderToastProvider>
+                <CreateOrderModalProvider>
+                  <Header />
+                  <TokenRefresher />
+                  <Suspense fallback={null}>{children}</Suspense>
+                  <CreateOrderModalRenderer />
+                </CreateOrderModalProvider>
+              </SuccessOrderToastProvider>
             </AuthProvider>
           </ErrorBoundary>
         </ReduxProvider>

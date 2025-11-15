@@ -10,7 +10,7 @@ export function middleware(req: NextRequest) {
     if (!accessToken && !isAuthPage) {
         const url = req.nextUrl.clone()
         url.pathname = '/login'
-        url.search = '' // bỏ query để tránh loop
+        url.search = ''
         return NextResponse.redirect(url)
     }
 

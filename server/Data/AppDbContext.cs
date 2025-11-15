@@ -24,9 +24,44 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<Table>().Property(t => t.Status).HasConversion<string>();
         modelBuilder.Entity<Order>().Property(t => t.OrderStatus).HasConversion<string>();
 
+        // Defaults
+        modelBuilder.Entity<Order>()
+            .Property(o => o.OrderType)
+            .HasDefaultValue("Dine In");
+
         modelBuilder.Entity<Order>()
                     .HasMany(o => o.OrderItems)
                     .WithOne()
                     .OnDelete(DeleteBehavior.Cascade);
+    }
+
+    public override int SaveChanges()
+    {
+        UpdateAuditFields();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken token = default)
+    {
+        UpdateAuditFields();
+        return base.SaveChangesAsync(token);
+    }
+
+    private void UpdateAuditFields()
+    {
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedAt = now;
+                entry.Entity.UpdatedAt = now;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
     }
 }

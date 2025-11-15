@@ -1,31 +1,21 @@
 "use client"
-
-import { useCart } from "@/hooks/useCart"
-/**
- * OrdersModal Component
- *
- * Displays a modal showing all current orders in the cart.
- * Shows "No orders exist" message when cart is empty.
- */
-
+import type { Order } from "@/models/order"
 import { X } from "lucide-react"
-
 import { AlertCircle } from "lucide-react"
 
 interface OrdersModalProps {
   isOpen: boolean
   onClose: () => void
+  order?: Order | null
 }
 
-export default function OrdersModal({ isOpen, onClose }: OrdersModalProps) {
-  const { items } = useCart()
-
+export default function OrdersModal({ isOpen, onClose, order }: OrdersModalProps) {
   if (!isOpen) return null
+  const items = order?.items ?? []
 
   return (
     <>
       <div className="fixed inset-0 bg-black/60 z-40 animate-fade-in" onClick={onClose} aria-hidden="true" />
-
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div className="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col animate-scale-in pointer-events-auto shadow-2xl">
           {/* Header */}
@@ -42,7 +32,7 @@ export default function OrdersModal({ isOpen, onClose }: OrdersModalProps) {
 
           {/* Content */}
           <div className="p-6 overflow-y-auto flex-1">
-            {items.length === 0 ? (
+            {!order || items.length === 0 ? (
               // Empty state
               <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                 <AlertCircle className="w-16 h-16 mb-4" />
@@ -51,6 +41,15 @@ export default function OrdersModal({ isOpen, onClose }: OrdersModalProps) {
             ) : (
               // Orders list
               <div className="space-y-4">
+                {/* Order meta */}
+                <div className="text-sm text-gray-500 mb-2">
+                  <div>Table: <span className="font-medium">{order.tableCode}</span></div>
+                  <div>Name: <span className="font-medium">{order.buyerName || "Guest"}</span></div>
+                  <div>Status: <span className="font-medium">{order.orderStatus}</span></div>
+                  <div>Date: <span className="font-medium">{new Date(order.orderDate).toLocaleString()}</span></div>
+                </div>
+
+                {/* Items */}
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center gap-4 pb-4 border-b last:border-b-0">
                     <img
@@ -69,10 +68,19 @@ export default function OrdersModal({ isOpen, onClose }: OrdersModalProps) {
                   </div>
                 ))}
 
+                {/* Totals */}
                 <div className="flex items-center justify-between pt-4 border-t-2">
-                  <span className="text-lg font-semibold">Total</span>
+                  <span className="text-lg font-semibold">Subtotal</span>
+                  <span className="font-medium">${order.subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-semibold">Discount</span>
+                  <span className="font-medium">-${order.discount.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xl font-bold">Total</span>
                   <span className="text-xl font-bold text-primary">
-                    ${items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
+                    ${order.orderTotal.toFixed(2)}
                   </span>
                 </div>
               </div>

@@ -1,16 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { menuApi } from "./api/menuApi"
-import { tablesApi } from "./api/tablesApi"
+import { tableApi } from "./api/tableApi"
+import { ordersApi } from "./api/orderApi"
 
 export const store = configureStore({
     reducer: {
         [menuApi.reducerPath]: menuApi.reducer,
-        [tablesApi.reducerPath]: tablesApi.reducer,
+        [tableApi.reducerPath]: tableApi.reducer,
+        [ordersApi.reducerPath]: ordersApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(
             menuApi.middleware,
-            tablesApi.middleware
+            tableApi.middleware,
+            ordersApi.middleware
         ),
 })
 

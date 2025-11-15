@@ -1,106 +1,105 @@
+"use client"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card } from "@/components/ui/card"
-import { ArrowRight, Check } from "lucide-react"
-import type { Order } from "@/lib/mock-data"
+import { OrderDto } from "@/types/order"
+import { ArrowRight, Check, X } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useUpdateOrderStatusMutation } from "@/store/api/orderApi"
+import type { OrderStatus } from "@/types/order"
+import { toast } from "sonner"
+import { formatOrderDateTime } from "@/lib/utils"
 
 interface OrderCardProps {
-  order: Order,
-  showActions?: boolean
+  order: OrderDto,
+  showActions?: boolean,
+  tableName?: string
 }
 
-export function OrderCard({ order, showActions }: OrderCardProps) {
-  const getStatusColor = (status: Order["status"]) => {
-    switch (status) {
-      case "in-progress":
-        return "text-orange-600"
-      case "ready":
-        return "text-green-600"
-      case "waiting-payment":
-        return "text-blue-600"
-      default:
-        return "text-muted-foreground"
+export function OrderCard({ order, showActions, tableName }: OrderCardProps) {
+  const [updateStatus, { isLoading: updating }] = useUpdateOrderStatusMutation()
+  const initials = (order.buyerName || "G").substring(0, 2).toUpperCase()
+  const { label: localTime } = formatOrderDateTime(order.orderDate, { timeStyle: "short" })
+  const handleChange = async (next: OrderStatus) => {
+    if (next === order.orderStatus) return;
+    try {
+      await updateStatus({ orderId: order.id, status: next }).unwrap();
+      toast.success(`Update the order ${order.id} status to ${order.orderStatus}`);
     }
-  }
-
-  const getProgressColor = (status: Order["status"]) => {
-    switch (status) {
-      case "in-progress":
-        return "bg-orange-500"
-      case "ready":
-        return "bg-green-500"
-      case "waiting-payment":
-        return "bg-blue-500"
-      default:
-        return "bg-muted-foreground"
-    }
-  }
-
-  const getStatusText = (status: Order["status"]) => {
-    switch (status) {
-      case "in-progress":
-        return "In Progress"
-      case "ready":
-        return "Ready to Serve"
-      case "waiting-payment":
-        return "Waiting for Payment"
-      default:
-        return status
+    catch {
+      toast.error("Fail to update order status");
     }
   }
 
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow overflow-hidden gap-0">
-      <div className="space-y-4">
+    <Card className="px-0 pb-0 hover:shadow-md transition-shadow overflow-hidden gap-0 w-full">
+
+      <div className="w-full space-y-4">
+
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-4">
           <div className="text-sm text-muted-foreground">
-            Order# <span className="font-medium text-foreground">{order.orderNumber}</span> / {order.type}
+            Table: <span className="font-medium text-foreground">{tableName ?? order.tableCode}</span>
           </div>
-          <div className="text-sm text-muted-foreground">{order.createdAt}</div>
+          <div className="text-xs text-muted-foreground">
+            {localTime}
+          </div>
         </div>
 
         {/* Customer */}
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 bg-primary text-primary-foreground">
-            <AvatarFallback>{order.customerName.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="text-xs text-muted-foreground">Customer Name</div>
-            <div className="font-medium">{order.customerName}</div>
+        <div className="w-full flex items-center justify-between px-4">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 bg-primary text-primary-foreground">
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="text-xs text-muted-foreground">Customer</div>
+              <div className="font-medium">{order.buyerName || "Guest"}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div onClick={(e) => e.stopPropagation()}>
+              <Select value={order.orderStatus} onValueChange={(v) => handleChange(v as OrderStatus)} disabled={updating} >
+                <SelectTrigger className="h-8 w-[140px]">
+                  <SelectValue placeholder="Change status" />
+                </SelectTrigger>
+                <SelectContent> {["Pending", "Preparing", "Served", "Cancelled", "Paid"].map((s) =>
+                  (<SelectItem key={s} value={s}> {s} </SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
-        {/* Status */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {order.status === "waiting-payment" ? (
-              <Check className="h-5 w-5 text-blue-600" />
-            ) : order.status === "ready" ? (
-              <Check className="h-5 w-5 text-green-600" />
-            ) : (
-              <div className="h-5 w-5 rounded-full border-2 border-orange-500 flex items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-orange-500" />
-              </div>
-            )}
-            <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>{getStatusText(order.status)}</span>
-          </div>
+
+
+        {/* STATUS */}
+        <div className="flex items-center justify-end mb-4 px-4">
           <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
             {order.items.length} Items
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>
-      </div>
 
-      <div className="mt-4 -mx-4 -mb-4">
-        <div className="flex items-center justify-between px-4 pb-2">
-          <span className="text-xs font-medium text-muted-foreground">Progress</span>
-          <span className="text-xs font-semibold">{order.progress}%</span>
-        </div>
-        <div className="h-2 bg-muted relative">
-          <div
-            className={`h-full transition-all duration-300 ${getProgressColor(order.status)}`}
-            style={{ width: `${order.progress}%` }}
-          />
+        <div>
+
+          <div className="h-2 bg-muted relative overflow-hidden rounded-md">
+            <div
+              className={`h-full w-full transition-all duration-500 rounded-md
+      ${order.orderStatus === "Pending"
+                  ? "bg-primary"
+                  : order.orderStatus === "Preparing"
+                    ? "bg-orange-500"
+                    : order.orderStatus === "Served"
+                      ? "bg-green-600"
+                      : order.orderStatus === "Cancelled"
+                        ? "bg-red-600"
+                        : order.orderStatus === "Paid"
+                          ? "bg-emerald-500"
+                          : "bg-muted"
+                }`}
+            />
+          </div>
         </div>
       </div>
     </Card>

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { X, ArrowLeft, User, UtensilsCrossed, ClipboardList } from "lucide-react"
@@ -16,32 +16,31 @@ interface CreateOrderModalProps {
 export type OrderFormData = {
   orderType: "Dine In" | "Take Away"
   numberOfPeople: number
-  babyChair: boolean
-  customerName: string
-  tableNumber?: string
+  customerName?: string
+  tableCode?: string
   items: Array<{
-    id: string
+    menuItemId: number;
     name: string
     price: number
     quantity: number
-    image: string
-    addOns?: Array<{ name: string; price: number }>
+    imageUrl?: string
     note?: string
   }>
 }
 
 export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
-  const [formData, setFormData] = useState<OrderFormData>({
+  const defaultState: OrderFormData = {
     orderType: "Dine In",
     numberOfPeople: 2,
-    babyChair: false,
     customerName: "",
     items: [],
-  })
+  }
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
+  const [formData, setFormData] = useState<OrderFormData>(defaultState)
 
   // Local flag to trigger entrance animation on mount
   const [show, setShow] = useState(false)
+  const isTakeAway = formData.orderType === "Take Away"
 
   useEffect(() => {
     if (isOpen) {
@@ -54,15 +53,18 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
   if (!isOpen) return null
 
   const handleBack = () => {
-    if (step > 1) {
-      setStep((step - 1) as 1 | 2 | 3 | 4)
-    }
+    setStep((prev) => {
+      if (prev === 3 && isTakeAway) return 1
+      return prev > 1 ? ((prev - 1) as 1 | 2 | 3 | 4) : prev
+    })
   }
 
   const handleNext = () => {
-    if (step < 4) {
-      setStep((step + 1) as 1 | 2 | 3 | 4)
-    }
+    setStep((prev) => {
+      if (prev === 1 && isTakeAway) return 3
+      if (prev === 2 && isTakeAway) return 3
+      return (Math.min(prev + 1, 4) as 1 | 2 | 3 | 4)
+    })
   }
 
   const handleClose = () => {
@@ -70,11 +72,9 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
     setFormData({
       orderType: "Dine In",
       numberOfPeople: 2,
-      babyChair: false,
       customerName: "",
       items: [],
     })
-    toast.success("Order created successfully")
     onClose()
   }
 
@@ -106,7 +106,14 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
               {steps.map((s, index) => (
                 <div key={s.number} className="flex items-center gap-3">
                   <button
-                    onClick={() => s.number < step && setStep(s.number as 1 | 2 | 3 | 4)}
+                    onClick={() => {
+                      if (s.number >= step) return
+                      if (isTakeAway && s.number === 2) {
+                        setStep(1)
+                      } else {
+                        setStep(s.number as 1 | 2 | 3 | 4)
+                      }
+                    }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${step === s.number
                       ? "bg-primary text-primary-foreground"
                       : step > s.number
@@ -132,9 +139,11 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
           {step === 1 && <OrderInfoStep formData={formData} setFormData={setFormData} onNext={handleNext} />}
           {step === 2 && <SelectTableStep formData={formData} setFormData={setFormData} onNext={handleNext} />}
           {step === 3 && <SelectMenuStep formData={formData} setFormData={setFormData} onNext={handleNext} />}
-          {step === 4 && <OrderSummaryStep formData={formData} onClose={handleClose} />}
+          {step === 4 && <OrderSummaryStep formData={formData} onClose={handleClose} onCreated={() => { setFormData(defaultState); setStep(1) }} />}
         </div>
       </div>
     </div>
   )
 }
+
+

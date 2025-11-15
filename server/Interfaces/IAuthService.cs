@@ -1,4 +1,5 @@
 using server.DTOs;
+using server.DTOs.Auth;
 using server.Helpers;
 
 namespace server.Interfaces;

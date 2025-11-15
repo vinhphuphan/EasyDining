@@ -5,36 +5,72 @@ import { Search, ChevronDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { NotificationPanel } from "@/components/notification-panel"
-import { orders } from "@/lib/mock-data"
+import { useGetOrdersQuery } from "@/store/api/orderApi"
+import { OrderDto } from "@/types/order"
+import { Button } from "@/components/ui/button"
+import { Spinner } from "@/components/ui/spinner"
+import { OrderDetailModal } from "@/components/modals/order-detail-modal"
 
 export default function HistoryPage() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState<"latest" | "oldest">("latest")
   const [showSortDropdown, setShowSortDropdown] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<OrderDto | null>(null)
 
+  const { data, isLoading, isError } = useGetOrdersQuery({ page: 1, pageSize: 30 })
+  const orders: OrderDto[] = data?.data?.items ?? []
 
-  const completedOrders = orders.filter((order) => order.status === "completed")
-
-  const filteredOrders = completedOrders.filter(
-    (order) =>
-      searchQuery === "" ||
-      order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()),
+  const completedOrders = orders.filter(order =>
+    ["Served", "Cancelled", "Paid"].includes(order.orderStatus)
   )
 
-  const sortedOrders = [...filteredOrders].sort((a, b) => {
-    if (sortBy === "latest") {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    } else {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    }
-  })
+  // Filter search
+  const filteredOrders = completedOrders.filter(order =>
+    searchQuery === "" ||
+    order.tableCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.buyerName?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  // Sort
+  const sortedOrders = [...filteredOrders].sort((a, b) =>
+    sortBy === "latest"
+      ? new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
+      : new Date(a.orderDate).getTime() - new Date(b.orderDate).getTime()
+  )
+
+  if (isLoading) return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col items-center h-64">
+        <Button disabled size="lg">
+          <Spinner />
+          Loading...
+        </Button>
+      </div>
+    </div>
+  )
+  if (isError) return (
+    <div className="min-h-[80vh] flex items-center justify-center bg-background">
+      <div className="max-w-md w-full px-4 py-8 text-center">
+        <h2 className="text-2xl font-bold text-foreground mb-6">
+          Something went wrong
+        </h2>
+        <Button
+          onClick={() => {
+            window.location.reload()
+          }}
+        >
+          Try again
+        </Button>
+      </div>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-background">
       <main className="p-6 max-w-[1600px] mx-auto">
-        {/* Page Header */}
+
+        {/* Header */}
         <div className="flex items-center gap-2 mb-6">
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -44,7 +80,7 @@ export default function HistoryPage() {
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h1 className="text-2xl font-semibold">History</h1>
+          <h1 className="text-xl font-semibold">History</h1>
         </div>
 
         {/* Search and Sort */}
@@ -52,7 +88,7 @@ export default function HistoryPage() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
-              placeholder="Search Order ID or Customer Name"
+              placeholder="Search by table or customer name"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -92,12 +128,13 @@ export default function HistoryPage() {
           </div>
         </div>
 
-        {/* Orders Table */}
+        {/* Table */}
         <div className="bg-card rounded-lg border">
           <div className="overflow-x-auto">
             <table className="w-full">
+
               <thead className="border-b">
-                <tr className="text-left">
+                <tr className="text-center">
                   <th className="px-6 py-4 text-sm font-medium text-muted-foreground">Order ID</th>
                   <th className="px-6 py-4 text-sm font-medium text-muted-foreground">Customer</th>
                   <th className="px-6 py-4 text-sm font-medium text-muted-foreground">Type</th>
@@ -107,19 +144,38 @@ export default function HistoryPage() {
                   <th className="px-6 py-4 text-sm font-medium text-muted-foreground">Status</th>
                 </tr>
               </thead>
+
               <tbody>
-                {sortedOrders.map((order) => (
-                  <tr key={order.id} className="border-b last:border-0 hover:bg-accent/50">
-                    <td className="px-6 py-4 text-sm font-medium">{order.orderNumber}</td>
-                    <td className="px-6 py-4 text-sm">{order.customerName}</td>
-                    <td className="px-6 py-4 text-sm capitalize">{order.type}</td>
-                    <td className="px-6 py-4 text-sm">{order.items.length} items</td>
-                    <td className="px-6 py-4 text-sm font-medium">US$ {order.totalAmount.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                {sortedOrders.map(order => (
+                  <tr
+                    key={order.id}
+                    className="border-b last:border-0 hover:bg-accent/50 text-center cursor-pointer"
+                    onClick={() => setSelectedOrder(order)}
+                  >
+                    <td className="px-5 py-3 text-sm">{order.tableCode}</td>
+                    <td className="px-5 py-3 text-sm">{order.buyerName ?? "-"}</td>
+                    <td className="px-5 py-3 text-sm">{"Dine in"}</td>
+                    <td className="px-5 py-3 text-sm">{order.items.length} items</td>
+                    <td className="px-5 py-3 text-sm font-normal">${order.subtotal.toFixed(2)}</td>
+                    <td className="px-5 py-3 text-sm text-muted-foreground">
+                      {new Date(order.orderDate).toLocaleString("en-AU", {
+                        year: "numeric",
+                        month: "short",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })}
                     </td>
                     <td className="px-6 py-4">
-                      <Badge className="bg-green-100 text-green-700 hover:bg-green-200">Completed</Badge>
+                      <Badge
+                        className={`${order.orderStatus === "Cancelled"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-green-100 text-green-700"
+                          }`}
+                      >
+                        {order.orderStatus}
+                      </Badge>
                     </td>
                   </tr>
                 ))}
@@ -131,6 +187,13 @@ export default function HistoryPage() {
 
       {/* Modals */}
       <NotificationPanel isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
+
+      {selectedOrder && (
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
     </div>
   )
 }

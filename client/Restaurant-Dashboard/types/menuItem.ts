@@ -9,4 +9,8 @@ export interface MenuItem {
     isBest?: boolean
     isVeg?: boolean
     isSpicy?: boolean
+    createdAt?: string
+    updatedAt?: string
 }
+
+export type MenuItemPayload = Omit<MenuItem, "id" | "createdAt" | "updatedAt">

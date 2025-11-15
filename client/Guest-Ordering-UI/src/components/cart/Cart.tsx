@@ -1,23 +1,44 @@
 "use client"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { X } from "lucide-react"
 import { useCart } from "@/hooks/useCart"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Spinner } from "../ui/spinner"
 import { toast } from "sonner"
 import { EmptyCartState } from "./EmptyCartState"
 import { OrderSummary } from "./OrderSummary"
 import { PaymentMethodSelector } from "./PaymentMethodSelector"
+import { useCreateOrderMutation } from "@/api/ordersApi"
+import type { Order } from "@/models/order"
+import { Spinner } from "../ui/spinner"
+import type { CartItem } from "@/models/cart"
+import type { VerifyTable } from "@/models/table"
 
 interface CartProps {
   open: boolean
   onClose: () => void
+  onOrderSuccess?: (data: {
+    amount: number;
+    orderId: number;
+    date: string;
+    receiptEmail?: string
+    order: Order
+  }) => void,
+  tableCode: string
 }
 
-export const Cart = ({ open, onClose }: CartProps) => {
+function resolveDiscount(code: string, items: CartItem[]): number {
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  switch (code.trim().toUpperCase()) {
+    case "SAVE10": return Math.min(10, subtotal)
+    case "WELCOME5": return Math.min(subtotal * 0.05, subtotal)
+    default: return 0
+  }
+}
+
+export const Cart = ({ open, onClose, onOrderSuccess, tableCode }: CartProps) => {
   const {
     items,
     updateQuantity,
@@ -25,13 +46,16 @@ export const Cart = ({ open, onClose }: CartProps) => {
   } = useCart()
 
   const [orderNote, setOrderNote] = useState("")
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "google-pay" | "cash">("card")
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "google-pay" | "cash">("cash")
   const [email, setEmail] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
+  const [buyerName, setBuyerName] = useState('');
+  const [createOrder] = useCreateOrderMutation();
+  const [discountCode, setDiscountCode] = useState("")
+  const discount = useMemo(() => resolveDiscount(discountCode, items), [discountCode, items])
 
   // Don't render if modal is closed
   if (!open) return null
-
 
   // Show empty state
   if (items.length === 0) {
@@ -59,28 +83,54 @@ export const Cart = ({ open, onClose }: CartProps) => {
     )
   }
 
-  // Handle payment submission
-  const handlePay = async () => {
+  const handleCreateOrder = async () => {
     setIsProcessing(true)
+
+    const orderPayload = {
+      tableCode: tableCode, // TODO: replace with dynamic table hash
+      buyerName: buyerName || "Guest",
+      buyerEmail: email.trim() ?? "",
+      orderType: "Dine In",
+      items: items.map(i => ({
+        menuItemId: i.menuItemId,
+        quantity: i.quantity,
+        note: i.note ?? ""
+      })),
+      discount
+    }
+
     try {
-      // TODO: Add actual payment processing logic here
-      // await processPayment({ paymentMethod, orderNote, email })
+      const res = await createOrder(orderPayload).unwrap()
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      if (!res.success) {
+        toast.error(res.message || "Failed to create order")
+        return
+      }
+      onClose();
 
-      // Clear cart after successful payment
-      clearCart()
+      const total = res.data.orderTotal
+        ?? items.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
-      toast.success("Payment processed successfully!")
-      onClose()
-    } catch (error) {
-      toast.error("Payment failed. Please try again.")
-      console.log("Error when processing payment : ", error);
+      onOrderSuccess?.({
+        amount: total,
+        orderId: res.data.id,
+        date: res.data.orderDate,
+        receiptEmail: email ?? "",
+        order: res.data
+      })
+
+      setTimeout(() => {
+        clearCart()
+      }, 0)
+
+    } catch (err) {
+      console.error("Create order error:", err)
+      toast.error("Failed to create order")
     } finally {
       setIsProcessing(false)
     }
   }
+
 
   return (
     <>
@@ -129,12 +179,27 @@ export const Cart = ({ open, onClose }: CartProps) => {
             <PaymentMethodSelector
               paymentMethod={paymentMethod}
               onPaymentMethodChange={setPaymentMethod}
-              onPay={handlePay}
+              onPay={handleCreateOrder}
               isLoading={isProcessing}
             />
 
             {/* Email for Receipt */}
-            <div className="pt-6 border-t border-gray-200">
+            <div className="pt-2">
+              <Label htmlFor="buyer-name" className="text-base font-semibold mb-2 block">
+                Your name
+              </Label>
+              <Input
+                id="buyer-name"
+                type="text"
+                placeholder="Guest"
+                value={buyerName}
+                onChange={(e) => setBuyerName(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            {/* Email for Receipt */}
+            <div className="pt-3 border-t border-gray-200">
               <Label htmlFor="receipt-email" className="text-base font-semibold mb-2 block">
                 Email for receipt
               </Label>
@@ -149,13 +214,19 @@ export const Cart = ({ open, onClose }: CartProps) => {
               />
             </div>
 
+            <div className="pt-3 border-t border-gray-200">
+              <Label htmlFor="discount-code" className="text-base font-semibold mb-2 block">Discount code</Label>
+              <Input id="discount-code" value={discountCode} onChange={(e) => setDiscountCode(e.target.value)} />
+              {discount > 0 && <p className="text-sm text-green-600 mt-2">-${discount.toFixed(2)} will be applied.</p>}
+            </div>
+
             {/* Confirm Order Button */}
             <Button
-              onClick={handlePay}
+              onClick={handleCreateOrder}
               disabled={isProcessing}
-              className="w-full mt-4 bg-primary hover:bg-primary/90 text-white h-12 cursor-pointer"
+              className="w-full bg-primary hover:bg-primary/90 text-white h-12 cursor-pointer"
             >
-              {isProcessing ? "Processing..." : "Confirm Order"}
+              {isProcessing ? <Spinner /> : "Confirm Order"}
             </Button>
           </div>
         </div>

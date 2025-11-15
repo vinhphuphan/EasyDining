@@ -60,7 +60,7 @@ export default function UserDropdown() {
         }
     }
 
-    const goSettings = () => router.push("/settings")
+    const goSettings = () => router.push("/")
 
     if (!currentUser) {
         // Return null while user data is loading
@@ -79,7 +79,7 @@ export default function UserDropdown() {
                         <AvatarFallback>{currentUser.username}</AvatarFallback>
                     </Avatar>
                     <div className="hidden md:block text-sm text-left">
-                        <div className="font-medium leading-tight">{currentUser.name}</div>
+                        <div className="font-medium leading-tight">{currentUser.username}</div>
                         <div className="text-xs text-muted-foreground">{currentUser.role}</div>
                     </div>
                     <svg

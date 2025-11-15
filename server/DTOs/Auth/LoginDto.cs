@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace server.DTOs;
+namespace server.DTOs.Auth;
 
 public class LoginDto
 {

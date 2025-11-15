@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using server.Data;
 using server.DTOs;
+using server.DTOs.Auth;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;

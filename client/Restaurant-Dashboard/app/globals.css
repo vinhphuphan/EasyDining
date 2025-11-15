@@ -3,6 +3,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.cld-widget,
+.cld-widget-overlay,
+.cld-widget-dialog {
+  position: fixed !important;
+  inset: 0;
+  z-index: 99999 !important;
+  pointer-events: auto !important;
+}
+
 :root {
   /* Updated color scheme for EasyDining with blue primary */
   --background: oklch(0.99 0 0);

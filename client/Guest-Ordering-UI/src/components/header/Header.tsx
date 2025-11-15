@@ -3,9 +3,11 @@ import { Cloud, ShoppingCart } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useNavigate } from "react-router-dom"
 import { useCart } from "@/hooks/useCart"
+import type { VerifyTable } from "@/models/table"
 
 interface HeaderProps {
-  onCartClick?: () => void
+  onCartClick?: () => void,
+
 }
 
 export const Header = ({ onCartClick }: HeaderProps) => {
@@ -23,7 +25,7 @@ export const Header = ({ onCartClick }: HeaderProps) => {
 
           {/* Center: Logo and restaurant info */}
           <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/")}>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
                 <Cloud className="h-5 w-5 text-primary" />
               </div>
@@ -53,7 +55,11 @@ export const Header = ({ onCartClick }: HeaderProps) => {
   )
 }
 
-export const HeaderBanner = () => (
+interface HeaderBannerProps {
+  verifyTable?: VerifyTable | null
+}
+
+export const HeaderBanner = ({ verifyTable }: HeaderBannerProps) => (
   <div className="w-full bg-black p-4 pt-0">
     <div className="flex items-center justify-center mb-4 w-full">
       <p className="text-xs text-gray-400">Restaurant</p>
@@ -65,7 +71,15 @@ export const HeaderBanner = () => (
     </div>
     {/* Table badge */}
     <div className="mt-3 flex justify-center">
-      <Badge className="bg-primary text-white border-0 px-4 py-1">Table. 1</Badge>
+      {verifyTable ? (
+        <Badge className="bg-primary text-white border-0 px-4 py-1">
+          Table. {verifyTable.tableName}
+        </Badge>
+      ) : (
+        <Badge className="bg-gray-600 text-white border-0 px-4 py-1 animate-pulse">
+          Scanning table...
+        </Badge>
+      )}
     </div>
     {/* Announcement banner */}
     <div className="mt-4 p-3 bg-gray-800 rounded-lg text-sm text-gray-300">

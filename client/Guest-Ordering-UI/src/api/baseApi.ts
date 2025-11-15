@@ -5,19 +5,17 @@ const customBaseQuery = fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://localhost:7184/api'
 });
 
-export const baseQueryWithErrorHandling = async (args: string | FetchArgs, api: BaseQueryApi,
-    extraOptions: object) => {
-
-    console.log("🌐 API Request:", args);
+export const baseQueryWithErrorHandling = async (
+    args: string | FetchArgs, 
+    api: BaseQueryApi,
+    extraOptions: object
+) => {
 
     api.dispatch(startLoading());
-
 
     const result = await customBaseQuery(args, api, extraOptions);
 
     api.dispatch(stopLoading());
-
-    console.log("📡 API Response:", result);
 
     if (result.error) {
         const { status, data } = result.error;

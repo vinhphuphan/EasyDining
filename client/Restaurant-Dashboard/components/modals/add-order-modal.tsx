@@ -5,33 +5,22 @@ import { X, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import type { MenuItem } from "@/lib/mock-data"
+import { MenuItem } from "@/types/menuItem"
 
 interface AddItemModalProps {
   item: MenuItem
   onClose: () => void
-  onAdd: (item: MenuItem, quantity: number, addOns: any[], note: string) => void
+  onAdd: (item: MenuItem, quantity: number, note: string) => void
 }
 
 export function AddItemModal({ item, onClose, onAdd }: AddItemModalProps) {
   const [quantity, setQuantity] = useState(1)
-  const [selectedAddOns, setSelectedAddOns] = useState<string[]>([])
   const [note, setNote] = useState("")
 
-  const handleAddOnToggle = (addOnName: string) => {
-    setSelectedAddOns((prev) =>
-      prev.includes(addOnName) ? prev.filter((name) => name !== addOnName) : [...prev, addOnName],
-    )
-  }
-
   const handleAdd = () => {
-    const addOns = item.addOns?.filter((a) => selectedAddOns.includes(a.name)) || []
-    onAdd(item, quantity, addOns, note)
+    onAdd(item, quantity, note)
   }
-
-  const addOnsTotal =
-    item.addOns?.filter((a) => selectedAddOns.includes(a.name)).reduce((sum, a) => sum + a.price, 0) || 0
-  const totalPrice = (item.price + addOnsTotal) * quantity
+  const totalPrice = item.price * quantity;
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -51,7 +40,7 @@ export function AddItemModal({ item, onClose, onAdd }: AddItemModalProps) {
         <div className="flex-1 overflow-y-auto p-6">
           {/* Item Info */}
           <div className="flex gap-4 mb-6">
-            <img src={item.image || "/placeholder.svg"} alt={item.name} className="w-20 h-20 rounded-lg object-cover" />
+            <img src={item.imageUrl || "/placeholder.svg"} alt={item.name} className="w-20 h-20 rounded-lg object-cover" />
             <div className="flex-1">
               <h3 className="font-semibold mb-1">{item.name}</h3>
               <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
@@ -62,44 +51,10 @@ export function AddItemModal({ item, onClose, onAdd }: AddItemModalProps) {
             </div>
           </div>
 
-          {/* Add Ons */}
-          {item.addOns && item.addOns.length > 0 && (
-            <div className="mb-6">
-              <h4 className="font-semibold mb-3">Add On</h4>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {item.addOns.map((addOn) => (
-                  <button
-                    key={addOn.name}
-                    onClick={() => handleAddOnToggle(addOn.name)}
-                    className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                      selectedAddOns.includes(addOn.name)
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selectedAddOns.includes(addOn.name) ? "border-primary bg-primary" : "border-border"
-                        }`}
-                      >
-                        {selectedAddOns.includes(addOn.name) && (
-                          <div className="w-2 h-2 rounded-full bg-primary-foreground"></div>
-                        )}
-                      </div>
-                      <span className="font-medium">{addOn.name}</span>
-                    </div>
-                    <span className="text-sm font-medium">+$ {addOn.price.toFixed(2)}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Note */}
           <div className="mb-6">
             <Label htmlFor="note" className="mb-2 block">
-              Add On <span className="text-muted-foreground font-normal">Optional</span>
+              Note
             </Label>
             <Textarea
               id="note"

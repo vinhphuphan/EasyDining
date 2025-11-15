@@ -1,6 +1,4 @@
-using System;
-
-namespace server.DTOs;
+namespace server.DTOs.Auth;
 
 public class RefreshTokenDto
 {

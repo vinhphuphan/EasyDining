@@ -196,7 +196,8 @@ public class DbInitializer
             {
                 Username = "admin",
                 Email = "admin@easydining.com",
-                Role = "Admin"
+                Role = "Admin",
+                Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/professional-man.jpg"
             };
 
             admin.PinCodeHash = hasher.HashPassword(admin, "123456");
@@ -205,7 +206,8 @@ public class DbInitializer
             {
                 Username = "staff",
                 Email = "staff@easydining.com",
-                Role = "Staff"
+                Role = "Staff",
+                Avatar = "https://raw.githubusercontent.com/vinhphuphan/EasyDining/refs/heads/main/client/Restaurant-Dashboard/public/young-waiter.jpg"
             };
 
             staff.PinCodeHash = hasher.HashPassword(staff, "111111");
@@ -220,10 +222,10 @@ public class DbInitializer
             context.Tables.AddRange(
                 new Table { Name = "A1", Seats = 4, Status = TableStatus.Available },
                 new Table { Name = "A2", Seats = 2, Status = TableStatus.Available },
-                new Table { Name = "A3", Seats = 2, Status = TableStatus.Occupied },
+                new Table { Name = "A3", Seats = 2, Status = TableStatus.Available },
                 new Table { Name = "A4", Seats = 2, Status = TableStatus.Available },
                 new Table { Name = "A5", Seats = 2, Status = TableStatus.Available },
-                new Table { Name = "B1", Seats = 6, Status = TableStatus.Occupied }
+                new Table { Name = "B1", Seats = 6, Status = TableStatus.Available }
             );
             context.SaveChanges();
         }

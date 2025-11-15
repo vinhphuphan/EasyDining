@@ -6,7 +6,7 @@ interface LoadingScreenProps {
   label?: string
 }
 
-export default function LoadingScreen({ label = "Loading" }: LoadingScreenProps) {
+export default function LoadingScreen({ label = "Loading..." }: LoadingScreenProps) {
   return (
     <div className="min-h-[60vh] w-full flex items-center justify-center">
       <div className="flex flex-col items-center gap-6">

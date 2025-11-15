@@ -8,7 +8,6 @@ import { PinPad } from "@/components/login-pin/pin-pad"
 import { PinInput } from "@/components/login-pin/pin-input"
 import { toast } from "sonner"
 import { Spinner } from "@/components/ui/spinner"
-import { login } from "@/services/authService"
 
 export default function LoginPage() {
   const router = useRouter()

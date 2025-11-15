@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
+using server.DTOs.MenuItem;
 using server.Entities;
 
 namespace server.Controllers
@@ -44,5 +45,45 @@ namespace server.Controllers
 
             return Ok(categories);
         }
+
+        [NonAction]
+        public override async Task<IActionResult> Update(int id, [FromBody] MenuItem entity)
+            => await base.Update(id, entity);
+
+        [Authorize]
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateMenuItem(int id, [FromBody] MenuItemUpdateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existing = await _context.MenuItems.FindAsync(id);
+            if (existing == null)
+                return NotFound(new { message = $"Menu item {id} not found." });
+
+            try
+            {
+                existing.Name = dto.Name.Trim();
+                existing.Price = dto.Price;
+                existing.Description = dto.Description ?? "";
+                existing.ImageUrl = dto.ImageUrl ?? "";
+                existing.Category = dto.Category ?? "";
+                existing.IsAvailable = dto.IsAvailable;
+                existing.IsBest = dto.IsBest;
+                existing.IsVeg = dto.IsVeg;
+                existing.IsSpicy = dto.IsSpicy;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                return NoContent(); // 204
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[UpdateMenuItem] Error updating ID {id}: {ex.Message}");
+                return StatusCode(500, new { message = "Error updating menu item", detail = ex.Message });
+            }
+        }
+
     }
 }

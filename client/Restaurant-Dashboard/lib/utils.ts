@@ -26,3 +26,18 @@ export function formatTime(date: string | Date): string {
     minute: '2-digit',
   }).format(new Date(date))
 }
+
+export function formatOrderDateTime(
+  value: string | Date,
+  options: Intl.DateTimeFormatOptions = {}
+) {
+  const date = typeof value === "string" ? new Date(value) : value
+  return {
+    label: new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+      ...options,
+    }).format(date),
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  }
+}

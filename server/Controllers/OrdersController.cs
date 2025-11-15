@@ -50,7 +50,7 @@ public class OrdersController(AppDbContext context) : ControllerBase
 
     // GET /api/orders/{id}
     [HttpGet("{id:int}")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<ActionResult<ServiceResult<OrderDto>>> GetOrderById(int id)
     {
         var order = await context.Orders
@@ -66,6 +66,7 @@ public class OrdersController(AppDbContext context) : ControllerBase
     }
 
     [HttpPut("update-status")]
+    [Authorize]
     public async Task<ActionResult> UpdateOrderStatus(UpdateOrderStatusDto dto)
     {
         if (!Enum.TryParse<OrderStatus>(dto.Status, true, out var newStatus))
@@ -90,99 +91,126 @@ public class OrdersController(AppDbContext context) : ControllerBase
     // POST /api/orders
     [AllowAnonymous]
     [HttpPost]
-    public async Task<ActionResult<ServiceResult<Order>>> CreateOrder([FromBody] CreateOrderRequest request)
+    public async Task<ActionResult<ServiceResult<OrderDto>>> CreateOrder([FromBody] CreateOrderRequest request)
     {
-        if (!ModelState.IsValid) return BadRequest(ServiceResult<Order>.Fail("Invalid order data"));
+        if (!ModelState.IsValid)
+            return BadRequest(ServiceResult<OrderDto>.Fail("Invalid order data"));
 
-        // Validate table exists
-        var table = await context.Tables.FirstOrDefaultAsync(t => t.TableCode == request.TableCode);
+        if (request.Items == null || request.Items.Count == 0)
+            return BadRequest(ServiceResult<OrderDto>.Fail("Order must contain at least one item."));
 
-        if (table is null) return BadRequest(new { message = "Invalid table code" });
+        // Normalize order type
+        var normalizedOrderType = string.IsNullOrWhiteSpace(request.OrderType)
+            ? "Dine In"
+            : request.OrderType.Trim();
 
-        // Extract all menu item IDs from the request
+        Table? table = null;
+
+        // Validate table for dine-in orders
+        if (normalizedOrderType.Equals("Dine In", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(request.TableCode))
+                return BadRequest(ServiceResult<OrderDto>.Fail("TableCode is required for Dine In orders"));
+
+            // Look up the table by code
+            table = await context.Tables.FirstOrDefaultAsync(t => t.TableCode == request.TableCode);
+            if (table is null)
+                return BadRequest(ServiceResult<OrderDto>.Fail("Invalid table code"));
+        }
+
+        // Extract menu item IDs
         var menuItemIds = request.Items.Select(x => x.MenuItemId).ToList();
 
-        // Fetch matching menu items from the database (read-only)
+        // Fetch matching menu items from DB
         var products = await context.MenuItems
             .AsNoTracking()
             .Where(x => menuItemIds.Contains(x.Id))
             .ToListAsync();
 
-        // Convert fetched IDs into a HashSet for O(1) lookup performance
-        var dbIds = products.Select(p => p.Id).ToHashSet();
+        var productMap = products.ToDictionary(p => p.Id);
+        var missing = menuItemIds.Where(id => !productMap.ContainsKey(id)).ToList();
 
-        // Check for menu item IDs that were requested but not found in the database
-        var missing = menuItemIds.Where(id => !dbIds.Contains(id)).Distinct().ToList();
-
-        // If any menu IDs are invalid, return a failure response
         if (missing.Count > 0)
-            return BadRequest(ServiceResult<Order>.Fail($"Invalid menu item ids: {string.Join(", ", missing)}"));
+            return BadRequest(ServiceResult<OrderDto>.Fail($"Invalid menu item ids: {string.Join(", ", missing)}"));
 
+        // Build order items
         var orderItems = new List<OrderItem>();
         decimal subtotal = 0;
 
-        // Convert DB results to dictionary for O(1) lookup inside the loop
-        var productsById = products.ToDictionary(p => p.Id);
-
-        // Build order items
         foreach (var item in request.Items)
         {
-            // Lookup product directly from dictionary
-            var product = productsById[item.MenuItemId];
+            var product = productMap[item.MenuItemId];
+            subtotal += product.Price * item.Quantity;
 
-            var ordered = new MenuItemOrdered
+            orderItems.Add(new OrderItem
             {
-                MenuItemId = product.Id,
-                Name = product.Name,
-                ImageUrl = product.ImageUrl
-            };
-
-            var orderItem = new OrderItem
-            {
-                ItemOrdered = ordered,
+                ItemOrdered = new MenuItemOrdered
+                {
+                    MenuItemId = product.Id,
+                    Name = product.Name,
+                    ImageUrl = product.ImageUrl
+                },
                 Price = product.Price,
                 Quantity = item.Quantity,
                 Note = item.Note
+            });
+        }
+
+        // Validate discount
+        var discount = request.Discount;
+        if (discount < 0)
+            return BadRequest(ServiceResult<OrderDto>.Fail("Discount cannot be negative"));
+        if (discount > subtotal)
+            return BadRequest(ServiceResult<OrderDto>.Fail("Discount cannot exceed subtotal"));
+
+        await using var tx = await context.Database.BeginTransactionAsync();
+
+        try
+        {
+            // TableId nullable; only set if a real table exists
+            var order = new Order
+            {
+                TableId = table?.Id,
+                TableCode = table?.TableCode ?? string.Empty,
+                OrderType = normalizedOrderType,
+                NumberOfPeople = request.NumberOfPeople,
+                BuyerName = request.BuyerName,
+                BuyerEmail = request.BuyerEmail ?? string.Empty,
+                OrderItems = orderItems,
+                Subtotal = subtotal,
+                Discount = discount,
+                OrderStatus = OrderStatus.Pending,
+                OrderDate = DateTime.UtcNow
             };
 
-            subtotal += product.Price * item.Quantity;
-            orderItems.Add(orderItem);
+            context.Orders.Add(order);
+
+            // Update table status if needed
+            if (table is not null && table.Status == TableStatus.Available)
+                table.Status = TableStatus.Occupied;
+
+            await context.SaveChangesAsync();
+
+            // Commit transaction after successful save
+            await tx.CommitAsync();
+
+            // Build DTO directly from tracked order, no requery needed
+            var dto = order.ToDto();
+
+            return CreatedAtAction(
+                nameof(GetOrderById),
+                new { id = order.Id },
+                ServiceResult<OrderDto>.Ok(dto, "Order created successfully")
+            );
         }
-
-        var order = new Order
+        catch (Exception ex)
         {
-            TableCode = request.TableCode,
-            BuyerName = request.BuyerName,
-            BuyerEmail = request.BuyerEmail ?? string.Empty,
-            OrderItems = orderItems,
-            Subtotal = subtotal,
-            Discount = 0,
-            OrderStatus = OrderStatus.Pending,
-            OrderDate = DateTime.UtcNow
-        };
-
-        context.Orders.Add(order);
-
-        if (table.Status == TableStatus.Available) table.Status = TableStatus.Occupied;
-
-        var success = await context.SaveChangesAsync() > 0;
-
-        if (!success)
-        {
-            return BadRequest(ServiceResult<Order>.Fail("Failed to create order"));
+            // Roll back on any error
+            await tx.RollbackAsync();
+            return BadRequest(ServiceResult<OrderDto>.Fail($"Failed to create order: {ex.Message}"));
         }
-
-        var created = await context.Orders
-                    .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.ItemOrdered)
-                    .FirstAsync(o => o.Id == order.Id);
-
-        return CreatedAtAction(
-            nameof(GetOrderById),
-            new { id = order.Id },
-            ServiceResult<OrderDto>.Ok(created.ToDto(), "Order created successfully")
-        );
     }
+
 
     // Put /api/orders/{id}
     [HttpPut("{id:int}")]
@@ -196,6 +224,10 @@ public class OrdersController(AppDbContext context) : ControllerBase
         order.BuyerName = dto.BuyerName;
         order.BuyerEmail = dto.BuyerEmail;
         order.TableCode = dto.TableCode;
+        if (!string.IsNullOrWhiteSpace(dto.OrderType))
+            order.OrderType = dto.OrderType;
+        if (dto.NumberOfPeople.HasValue)
+            order.NumberOfPeople = dto.NumberOfPeople;
 
         var success = await context.SaveChangesAsync() > 0;
         if (!success) return BadRequest(ServiceResult<Order>.Fail("Failed to update order"));

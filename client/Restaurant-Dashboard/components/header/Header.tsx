@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation"
 import { Cloud, Bell, CheckCircle, FileText, Clock, Calendar, SquareMenu } from "lucide-react"
 import { useState } from "react"
 import { NotificationPanel } from "@/components/notification-panel"
-import UserDropdown from "@/components/header/UserDropdown"
-import MobileMenuDropdown from "@/components/header/MobileMenuDropdown"
+import UserDropdown from "@/components/header/user-drop-down"
+import MobileMenuDropdown from "@/components/header/mobile-menu-dropdown"
 
 export default function Header() {
     const path = usePathname()

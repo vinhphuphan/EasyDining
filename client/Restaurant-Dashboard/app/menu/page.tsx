@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Plus, SquareMenu, Loader2, AlertCircle, Pencil, Trash } from "lucide-react"
+import { Search, Plus, SquareMenu, Loader2, AlertCircle, Pencil, Trash, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -12,10 +12,13 @@ import { useMenu, useCategories } from "@/hooks/useMenu"
 import { useUpdateMenuItemMutation, useDeleteMenuItemMutation } from "@/store/api/menuApi"
 import type { MenuItem } from "@/types/menuItem"
 import { Spinner } from "@/components/ui/spinner"
+import { EditDishModal } from "@/components/modals/edit-dish-modal"
+import { toast } from "sonner"
 
 export default function InventoryPage() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [isAddDishOpen, setIsAddDishOpen] = useState(false)
+  const [isEditDishOpen, setIsEditDishOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<"available" | "not-available">("available")
   const [categoryFilter, setCategoryFilter] = useState<string>("")
@@ -63,7 +66,7 @@ export default function InventoryPage() {
   // Handle edit menu item
   const handleEditMenuItem = (item: MenuItem) => {
     setEditMenuItem(item)
-    setIsAddDishOpen(true)
+    setIsEditDishOpen(true)
   }
 
   // Handle delete request
@@ -78,6 +81,7 @@ export default function InventoryPage() {
 
     try {
       await deleteMenuItem(deleteMenuItemId).unwrap()
+      toast.success(`Deleted item #${deleteMenuItemId} successfully`);
       // Refetch data after successful delete
       refetch()
     } catch (error) {
@@ -223,7 +227,6 @@ export default function InventoryPage() {
                 {menuItems.length} Items
               </Badge>
               <Button
-                variant="outline"
                 size="sm"
                 onClick={() => refetch()}
                 disabled={menuLoading}
@@ -231,7 +234,10 @@ export default function InventoryPage() {
                 {menuLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "Refresh"
+                  <div className="flex items-center justify-center">
+                    <RefreshCcw className="h-5 w-5 mr-2" />
+                    Refresh
+                  </div>
                 )}
               </Button>
             </div>
@@ -387,6 +393,17 @@ export default function InventoryPage() {
         }}
 
       />
+
+      <EditDishModal
+        isOpen={isEditDishOpen}
+        dishId={editMenuItem?.id ?? null}
+        onClose={() => {
+          setIsEditDishOpen(false)
+          setEditMenuItem(null)
+        }}
+        onUpdated={() => refetch()}
+      />
+
       <DeleteConfirmModal
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
