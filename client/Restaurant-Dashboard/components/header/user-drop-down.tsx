@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
     DropdownMenu,
@@ -14,34 +14,15 @@ import {
 import { LogOut, Settings, Pencil } from "lucide-react"
 import { EmployeeProfileModal } from "@/components/modals/employee-profile-modal"
 import { toast } from "sonner"
+import { useAuth } from "@/context/AuthContext"
 
-interface User {
-    id: number
-    username: string
-    avatar: string
-    role: string
-}
 
 export default function UserDropdown() {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-    // Get user from localStorage when component mount
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-
-        const storedUser = localStorage.getItem("user")
-        if (storedUser) {
-            try {
-                setCurrentUser(JSON.parse(storedUser))
-            } catch (err) {
-                console.error("Error parsing stored user:", err)
-                localStorage.removeItem("user")
-            }
-        }
-    }, [])
+    const { user, login, logout, updateUser } = useAuth()
+    if (!user) return null
 
     const handleLogout = async () => {
         try {
@@ -62,25 +43,20 @@ export default function UserDropdown() {
 
     const goSettings = () => router.push("/")
 
-    if (!currentUser) {
-        // Return null while user data is loading
-        return null
-    }
-
     return (
         <>
             <DropdownMenu open={open} onOpenChange={setOpen}>
                 <DropdownMenuTrigger className="flex items-center gap-2 focus:outline-none cursor-pointer">
                     <Avatar className="h-9 w-9">
                         <AvatarImage
-                            src={currentUser.avatar || "/placeholder.svg"}
-                            alt={currentUser.username}
+                            src={user.avatar || "/placeholder.svg"}
+                            alt={user.username}
                         />
-                        <AvatarFallback>{currentUser.username}</AvatarFallback>
+                        <AvatarFallback>{user.username}</AvatarFallback>
                     </Avatar>
                     <div className="hidden md:block text-sm text-left">
-                        <div className="font-medium leading-tight">{currentUser.username}</div>
-                        <div className="text-xs text-muted-foreground">{currentUser.role}</div>
+                        <div className="font-medium leading-tight">{user.username}</div>
+                        <div className="text-xs text-muted-foreground">{user.role}</div>
                     </div>
                     <svg
                         className={`transition-transform duration-200 ${open ? "rotate-180" : ""}
@@ -121,7 +97,8 @@ export default function UserDropdown() {
             <EmployeeProfileModal
                 isOpen={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}
-                employee={currentUser}
+                employee={user}
+                onUpdate={updateUser}
             />
         </>
     )

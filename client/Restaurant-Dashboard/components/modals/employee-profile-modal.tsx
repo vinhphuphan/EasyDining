@@ -1,451 +1,349 @@
 "use client"
 
-import { useState } from "react"
-import { X, User, Bell, Lock, Monitor, Check, Pencil } from "lucide-react"
+import { useEffect, useState } from "react"
+import { X, User, Lock, Monitor, Check, Pencil } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { PinPad } from "@/components/login-pin/pin-pad"
+import {
+    useGetUserByIdQuery,
+    useUpdateUserMutation,
+} from "@/store/api/userApi"
+import { ImageUploader } from "@/components/image-uploader"
+import { toast } from "sonner"
 
 interface EmployeeProfileModalProps {
     isOpen: boolean
     onClose: () => void
     employee?: {
-        id: string
-        name: string
-        role: string
-        avatar: string
-        shift: string
-        phone: string
-        email: string
-        address: string
-        joiningDate: string
-        employmentStatus: string
-        manager: string
+        id: number
     }
+    onUpdate: (updatedUser: any) => void
 }
 
-export function EmployeeProfileModal({ isOpen, onClose, employee }: EmployeeProfileModalProps) {
-    const [activeTab, setActiveTab] = useState<"employee" | "notification" | "security" | "display">("employee")
-    const [originalEmployee, setOriginalEmployee] = useState(employee || {
-        id: "01011425",
-        name: "Richardo Wilson",
-        role: "Waiter",
-        avatar: "/professional-man.jpg",
-        shift: "10:00 AM - 12:00 PM",
-        phone: "(629) 555-0123",
-        email: "ajpdesign.info@gmail.com",
-        address: "390 Market Street, Suite 200",
-        joiningDate: "1 Jan, 2025",
-        employmentStatus: "Full-Time Employment",
-        manager: "Alexander Rodriguez",
-    })
+export function EmployeeProfileModal({ isOpen, onClose, employee, onUpdate }: EmployeeProfileModalProps) {
+    const [activeTab, setActiveTab] = useState<"employee" | "security" | "display">("employee")
     const [isEditMode, setIsEditMode] = useState(false)
+    const [showAvatarUploader, setShowAvatarUploader] = useState(false)
     const [showChangePinModal, setShowChangePinModal] = useState(false)
     const [showSuccessModal, setShowSuccessModal] = useState(false)
     const [pin, setPin] = useState("")
 
-    const [editedEmployee, setEditedEmployee] = useState(employee || {
-        id: "01011425",
-        name: "Richardo Wilson",
-        role: "Waiter",
-        avatar: "/professional-man.jpg",
-        shift: "10:00 AM - 12:00 PM",
-        phone: "(629) 555-0123",
-        email: "ajpdesign.info@gmail.com",
-        address: "390 Market Street, Suite 200",
-        joiningDate: "1 Jan, 2025",
-        employmentStatus: "Full-Time Employment",
-        manager: "Alexander Rodriguez",
-    })
+    const { data: user, isLoading, refetch } = useGetUserByIdQuery(
+        employee?.id ?? 0,
+        { skip: !employee?.id }
+    )
 
-    const [notifications, setNotifications] = useState({
-        kitchenPopup: true,
-        kitchenSound: true,
-        inventoryPopup: true,
-        inventorySound: true,
-        systemPopup: true,
-        systemSound: true,
-    })
+    const [editedEmployee, setEditedEmployee] = useState<any>(null)
+    const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
 
-    const handlePinComplete = (completedPin: string) => {
-        setPin(completedPin)
-    }
+    useEffect(() => {
+        if (user) {
+            setEditedEmployee(user)
+        }
+    }, [user])
 
-    const handleChangePinSubmit = () => {
-        if (pin.length === 6) {
-            setShowChangePinModal(false)
-            setShowSuccessModal(true)
-            setPin("")
+    // Save Profile Changes
+    const handleSaveProfile = async () => {
+        if (!editedEmployee) return
+
+        try {
+            await updateUser({
+                id: editedEmployee.id,
+                updates: {
+                    username: editedEmployee.username,
+                    email: editedEmployee.email,
+                    role: editedEmployee.role,
+                    avatar: editedEmployee.avatar,
+                    shiftStart: editedEmployee.shiftStart,
+                    shiftEnd: editedEmployee.shiftEnd
+                }
+            }).unwrap()
+
+            toast.success("Profile updated successfully");
+
+            onUpdate({ ...editedEmployee });
+
+            setIsEditMode(false);
+
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to update user")
         }
     }
 
-    const handleSuccessOk = () => {
-        setShowSuccessModal(false)
+    // Change PIN
+    const handlePinComplete = (completedPin: string) => setPin(completedPin)
+
+    const handleChangePinSubmit = async () => {
+        if (!user || pin.length !== 6) return
+
+        try {
+            const updated = await updateUser({
+                id: user.id,
+                updates: {
+                    ...editedEmployee,
+                    pinCode: pin
+                }
+            }).unwrap()
+
+            onUpdate(updated)
+            toast.success("PIN updated successfully!")
+            setShowChangePinModal(false)
+            setShowSuccessModal(true)
+            setPin("")
+        } catch (err: any) {
+            toast.error(err?.data?.message || "Failed to update PIN")
+        }
     }
 
-    const handleSaveProfile = () => {
-        setIsEditMode(false)
-    }
-
-    const handleCancelEdit = () => {
-        setEditedEmployee(originalEmployee)
-        setIsEditMode(false)
+    if (isLoading || !editedEmployee) {
+        return (
+            <Dialog open={isOpen} onOpenChange={onClose}>
+                <DialogContent className="flex items-center justify-center h-60">
+                    <span className="text-muted-foreground">Loading user...</span>
+                </DialogContent>
+            </Dialog>
+        )
     }
 
     return (
         <>
-            <Dialog open={isOpen} onOpenChange={onClose}>
+            {/* MAIN PROFILE MODAL */}
+            <Dialog open={isOpen} onOpenChange={onClose} modal={false}>
                 <DialogHeader className="hidden">
                     <DialogTitle></DialogTitle>
                 </DialogHeader>
-                <DialogContent className="!max-w-3xl lg:!max-w-4xl xl:!max-w-5xl w-full max-h-[90vh] overflow-hidden p-0" showCloseButton={false}>
-                    <div className="space-y-4 flex h-[85vh]">
+
+                <DialogContent
+                    className="!max-w-3xl lg:!max-w-4xl xl:!max-w-5xl w-full max-h-[90vh] overflow-hidden p-0"
+                    showCloseButton={false}
+                    onInteractOutside={(event) => event.preventDefault()}
+                >
+                    <div className="flex h-[85vh]">
+
+                        {/* Sidebar */}
                         <div className="w-64 border-r bg-muted/30 p-6 space-y-2">
-                            <h2 className="text-lg font-semibold mb-4">Setting</h2>
-                            <button
-                                onClick={() => setActiveTab("employee")}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "employee" ? "bg-background shadow-sm" : "hover:bg-background/50"
-                                    }`}
-                            >
-                                <User className="h-5 w-5" />
-                                <span className="text-sm font-medium">Employee Info</span>
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("notification")}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "notification" ? "bg-background shadow-sm" : "hover:bg-background/50"
-                                    }`}
-                            >
-                                <Bell className="h-5 w-5" />
-                                <span className="text-sm font-medium">Notification</span>
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("security")}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "security" ? "bg-background shadow-sm" : "hover:bg-background/50"
-                                    }`}
-                            >
-                                <Lock className="h-5 w-5" />
-                                <span className="text-sm font-medium">Security</span>
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("display")}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "display" ? "bg-background shadow-sm" : "hover:bg-background/50"
-                                    }`}
-                            >
-                                <Monitor className="h-5 w-5" />
-                                <span className="text-sm font-medium">Display</span>
-                            </button>
+                            <h2 className="text-lg font-semibold mb-4">Settings</h2>
+
+                            {["employee", "security", "display"].map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab as any)}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors 
+                                        ${activeTab === tab ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
+                                >
+                                    {tab === "employee" && <User className="h-5 w-5" />}
+                                    {tab === "security" && <Lock className="h-5 w-5" />}
+                                    {tab === "display" && <Monitor className="h-5 w-5" />}
+                                    <span className="capitalize">{tab}</span>
+                                </button>
+                            ))}
                         </div>
 
-                        <div className="flex-1 overflow-y-auto">
-                            <div className="p-8">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-xl font-semibold">
-                                        {activeTab === "employee"
-                                            ? "Employee Info"
-                                            : activeTab === "notification"
-                                                ? "Notification"
-                                                : activeTab === "security"
-                                                    ? "Security"
-                                                    : "Display"}
-                                    </h3>
-                                    <button onClick={onClose} className="p-2 hover:bg-accent rounded-lg transition-colors">
-                                        <X className="h-5 w-5" />
-                                    </button>
-                                </div>
+                        {/* Content */}
+                        <div className="flex-1 overflow-y-auto p-8">
 
-                                {activeTab === "employee" && (
-                                    <div className="space-y-6">
-                                        <div className="flex items-center justify-between pb-6 border-b">
-                                            <div className="flex items-center gap-4">
-                                                <Avatar className="h-16 w-16">
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-semibold capitalize">{activeTab}</h3>
+                                <button onClick={onClose} className="p-2 hover:bg-accent rounded-lg transition-colors">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            {/* Employee Tab */}
+                            {activeTab === "employee" && (
+                                <>
+                                    {/* Avatar + ID */}
+                                    <div className="flex items-center justify-between pb-6 border-b">
+                                        <div className="flex items-center gap-4">
+                                            <div className="relative group">
+                                                <Avatar className="h-20 w-20 border shadow-sm">
                                                     <AvatarImage src={editedEmployee.avatar || "/placeholder.svg"} />
-                                                    <AvatarFallback>{editedEmployee.name}</AvatarFallback>
+                                                    <AvatarFallback>{editedEmployee.username[0]}</AvatarFallback>
                                                 </Avatar>
-                                                <div>
-                                                    <div className="text-sm text-muted-foreground">Employee ID# {editedEmployee.id}</div>
-                                                    <div className="text-lg font-semibold">{editedEmployee.name}</div>
-                                                </div>
+
+                                                {isEditMode && (
+                                                    <button
+                                                        onClick={() => setShowAvatarUploader(true)}
+                                                        className="absolute bottom-0 right-0 bg-black/70 text-white p-1.5 rounded-full"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </button>
+                                                )}
                                             </div>
-                                            <div className="text-right">
-                                                <div className="text-sm text-muted-foreground">Your shift today</div>
-                                                <div className="text-lg font-semibold">{editedEmployee.shift}</div>
+
+                                            <div>
+                                                <p className="text-sm text-muted-foreground">Employee ID: #{editedEmployee.id}</p>
+                                                <p className="text-md font-medium">{editedEmployee.username}</p>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-6">
-                                            <div className="flex items-center justify-between">
-                                                <h4 className="font-semibold">Employee Information</h4>
-                                                {!isEditMode ? (
-                                                    <Button variant="outline" size="sm" onClick={() => {
-                                                        setOriginalEmployee(editedEmployee)
-                                                        setIsEditMode(true)
-                                                    }}>
-                                                        <Pencil className="h-4 w-4 mr-2" />
-                                                        Edit Profile
+                                        <div className="text-right">
+                                            <p className="text-sm text-muted-foreground">Shift</p>
+                                            <p className="text-md font-medium">
+                                                {editedEmployee.shiftStart && editedEmployee.shiftEnd
+                                                    ? `${editedEmployee.shiftStart} → ${editedEmployee.shiftEnd}`
+                                                    : "Not assigned"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Editable Fields */}
+                                    <div className="mt-6">
+                                        <div className="flex justify-between mb-3">
+                                            <h4 className="font-medium">Employee Information</h4>
+
+                                            {!isEditMode ? (
+                                                <Button variant="outline" size="sm" onClick={() => setIsEditMode(true)}>
+                                                    <Pencil className="h-4 w-4 mr-1" /> Edit
+                                                </Button>
+                                            ) : (
+                                                <div className="flex gap-2">
+                                                    <Button variant="outline" size="sm" onClick={() => setIsEditMode(false)}>Cancel</Button>
+                                                    <Button size="sm" disabled={isUpdating} onClick={handleSaveProfile}>
+                                                        {isUpdating ? "Saving..." : "Save"}
                                                     </Button>
-                                                ) : (
-                                                    <div className="flex gap-2">
-                                                        <Button variant="outline" size="sm" onClick={handleCancelEdit}>
-                                                            Cancel
-                                                        </Button>
-                                                        <Button size="sm" onClick={handleSaveProfile}>
-                                                            Save Changes
-                                                        </Button>
-                                                    </div>
-                                                )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+
+                                            {/* Username */}
+                                            <div className="space-y-2">
+                                                <Label>Username</Label>
+                                                <Input
+                                                    disabled={!isEditMode}
+                                                    value={editedEmployee.username}
+                                                    onChange={(e) => setEditedEmployee({ ...editedEmployee, username: e.target.value })}
+                                                />
                                             </div>
 
-                                            <div>
-                                                <h5 className="text-sm font-medium mb-4">Personal</h5>
+                                            {/* Email */}
+                                            <div className="space-y-2">
+                                                <Label>Email</Label>
+                                                <Input
+                                                    disabled={!isEditMode}
+                                                    value={editedEmployee.email || ""}
+                                                    onChange={(e) => setEditedEmployee({ ...editedEmployee, email: e.target.value })}
+                                                />
+                                            </div>
+
+                                            {/* Role */}
+                                            <div className="space-y-2">
+                                                <Label>Role</Label>
                                                 {isEditMode ? (
-                                                    <div className="space-y-4">
-                                                        <div className="grid grid-cols-3 gap-4">
-                                                            <div>
-                                                                <Label className="text-sm text-muted-foreground">Full Name</Label>
-                                                                <Input
-                                                                    value={editedEmployee.name}
-                                                                    onChange={(e) => setEditedEmployee({ ...editedEmployee, name: e.target.value })}
-                                                                    className="mt-1"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <Label className="text-sm text-muted-foreground">Phone</Label>
-                                                                <Input
-                                                                    value={editedEmployee.phone}
-                                                                    onChange={(e) => setEditedEmployee({ ...editedEmployee, phone: e.target.value })}
-                                                                    className="mt-1"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <Label className="text-sm text-muted-foreground">Email</Label>
-                                                                <Input
-                                                                    value={editedEmployee.email}
-                                                                    onChange={(e) => setEditedEmployee({ ...editedEmployee, email: e.target.value })}
-                                                                    className="mt-1"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <Label className="text-sm text-muted-foreground">Address</Label>
-                                                            <Input
-                                                                value={editedEmployee.address}
-                                                                onChange={(e) => setEditedEmployee({ ...editedEmployee, address: e.target.value })}
-                                                                className="mt-1"
-                                                            />
-                                                        </div>
-                                                    </div>
+                                                    <select
+                                                        value={editedEmployee.role}
+                                                        onChange={(e) => setEditedEmployee({ ...editedEmployee, role: e.target.value })}
+                                                        className="border px-2 py-2 rounded-lg text-sm w-full"
+                                                    >
+                                                        <option value="Admin">Admin</option>
+                                                        <option value="Staff">Staff</option>
+                                                    </select>
                                                 ) : (
-                                                    <>
-                                                        <div className="grid grid-cols-3 gap-6">
-                                                            <div>
-                                                                <div className="text-sm text-muted-foreground mb-1">Full Name</div>
-                                                                <div className="text-sm">{editedEmployee.name}</div>
-                                                            </div>
-                                                            <div>
-                                                                <div className="text-sm text-muted-foreground mb-1">Phone</div>
-                                                                <div className="text-sm">{editedEmployee.phone}</div>
-                                                            </div>
-                                                            <div>
-                                                                <div className="text-sm text-muted-foreground mb-1">Email</div>
-                                                                <div className="text-sm">{editedEmployee.email}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="mt-4">
-                                                            <div className="text-sm text-muted-foreground mb-1">Address</div>
-                                                            <div className="text-sm">{editedEmployee.address}</div>
-                                                        </div>
-                                                    </>
+                                                    <p className="mt-1 text-md">{editedEmployee.role}</p>
                                                 )}
                                             </div>
 
-                                            <div>
-                                                <h5 className="text-sm font-medium mb-4">Work</h5>
-                                                <div className="grid grid-cols-3 gap-6">
-                                                    <div>
-                                                        <div className="text-sm text-muted-foreground mb-1">Joining Date</div>
-                                                        <div className="text-sm">{editedEmployee.joiningDate}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-sm text-muted-foreground mb-1">Access Role</div>
-                                                        <div className="text-sm">{editedEmployee.role}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-sm text-muted-foreground mb-1">Employment Status</div>
-                                                        <div className="text-sm">{editedEmployee.employmentStatus}</div>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-4">
-                                                    <div className="text-sm text-muted-foreground mb-1">Manager</div>
-                                                    <div className="text-sm">{editedEmployee.manager}</div>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
-                                )}
+                                </>
+                            )}
 
-                                {activeTab === "notification" && (
-                                    <div className="space-y-6">
-                                        <div className="space-y-6">
-                                            <div>
-                                                <h4 className="font-semibold mb-2">Kitchen Update</h4>
-                                                <p className="text-sm text-muted-foreground mb-4">Notification from kitchen, to inform about order.</p>
-                                                <div className="space-y-3">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm">Pop up information</span>
-                                                        <Switch
-                                                            checked={notifications.kitchenPopup}
-                                                            onCheckedChange={(checked) =>
-                                                                setNotifications({ ...notifications, kitchenPopup: checked })
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm">Notification sound</span>
-                                                        <Switch
-                                                            checked={notifications.kitchenSound}
-                                                            onCheckedChange={(checked) =>
-                                                                setNotifications({ ...notifications, kitchenSound: checked })
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <h4 className="font-semibold mb-2">Inventory</h4>
-                                                <p className="text-sm text-muted-foreground mb-4">Notification about inventory, to inform about stock ingredients.</p>
-                                                <div className="space-y-3">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm">Pop up information</span>
-                                                        <Switch
-                                                            checked={notifications.inventoryPopup}
-                                                            onCheckedChange={(checked) =>
-                                                                setNotifications({ ...notifications, inventoryPopup: checked })
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm">Notification sound</span>
-                                                        <Switch
-                                                            checked={notifications.inventorySound}
-                                                            onCheckedChange={(checked) =>
-                                                                setNotifications({ ...notifications, inventorySound: checked })
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <h4 className="font-semibold mb-2">System Update</h4>
-                                                <p className="text-sm text-muted-foreground mb-4">Notification about update system.</p>
-                                                <div className="space-y-3">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm">Pop up information</span>
-                                                        <Switch
-                                                            checked={notifications.systemPopup}
-                                                            onCheckedChange={(checked) =>
-                                                                setNotifications({ ...notifications, systemPopup: checked })
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm">Notification sound</span>
-                                                        <Switch
-                                                            checked={notifications.systemSound}
-                                                            onCheckedChange={(checked) =>
-                                                                setNotifications({ ...notifications, systemSound: checked })
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
+                            {/* SECURITY */}
+                            {activeTab === "security" && (
+                                <div className="space-y-6">
+                                    <div className="p-6 border rounded-lg flex items-center justify-between">
+                                        <div>
+                                            <h4 className="font-semibold mb-1">PIN</h4>
+                                            <p className="text-sm text-muted-foreground">Update login PIN</p>
                                         </div>
+                                        <Button variant="ghost" size="sm" onClick={() => setShowChangePinModal(true)}>
+                                            Change PIN →
+                                        </Button>
                                     </div>
-                                )}
+                                </div>
+                            )}
 
-                                {activeTab === "security" && (
-                                    <div className="space-y-6">
-                                        <div className="flex items-center justify-between p-6 border rounded-lg hover:bg-accent/50 transition-colors">
-                                            <div>
-                                                <h4 className="font-semibold mb-1">PIN</h4>
-                                                <p className="text-sm text-muted-foreground">Change PIN for your account</p>
-                                            </div>
-                                            <Button variant="ghost" size="sm" onClick={() => setShowChangePinModal(true)}>
-                                                Change PIN
-                                                <svg className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                </svg>
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeTab === "display" && (
-                                    <div className="space-y-6">
-                                        <div className="p-6 border rounded-lg">
-                                            <p className="text-sm text-muted-foreground">Display settings will be available soon.</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            {/* DISPLAY */}
+                            {activeTab === "display" && (
+                                <div className="p-6 border rounded-lg text-sm text-muted-foreground">
+                                    Display preferences coming soon…
+                                </div>
+                            )}
                         </div>
                     </div>
                 </DialogContent>
             </Dialog>
 
+            {/* CHANGE PIN MODAL */}
             <Dialog open={showChangePinModal} onOpenChange={setShowChangePinModal}>
-                <DialogContent className="max-w-md" showCloseButton={false}>
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-semibold">Change PIN</h2>
-                        <button onClick={() => setShowChangePinModal(false)} className="p-2 hover:bg-accent rounded-lg transition-colors">
-                            <X className="h-5 w-5" />
-                        </button>
-                    </div>
+                <DialogHeader className="hidden">
+                    <DialogTitle></DialogTitle>
+                </DialogHeader>
+                <DialogContent className="max-w-md">
+                    <h2 className="text-lg font-semibold mb-3">Change PIN</h2>
 
-                    <div className="space-y-6">
-                        <div className="text-center">
-                            <p className="text-lg font-medium mb-6">Please input your New PIN</p>
-                            <div className="flex justify-center gap-2 mb-8">
-                                {[...Array(6)].map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className={`h-12 w-12 rounded-lg border-2 flex items-center justify-center transition-colors ${i < pin.length ? "border-primary bg-primary/10" : "border-muted"
-                                            }`}
-                                    >
-                                        {i < pin.length && <div className="h-3 w-3 rounded-full bg-primary" />}
-                                    </div>
-                                ))}
-                            </div>
+                    <div className="text-center">
+                        <div className="flex justify-center gap-2 mb-6">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className={`h-10 w-10 border rounded-lg flex items-center justify-center`}>
+                                    {i < pin.length && <div className="h-3 w-3 rounded-full bg-primary" />}
+                                </div>
+                            ))}
                         </div>
 
-                        <PinPad onComplete={handlePinComplete} maxLength={6} />
-
-                        <Button onClick={handleChangePinSubmit} className="w-full" disabled={pin.length !== 6}>
-                            Change PIN
-                        </Button>
+                        <PinPad maxLength={6} onComplete={handlePinComplete} />
                     </div>
+
+                    <Button disabled={pin.length !== 6} className="w-full mt-6" onClick={handleChangePinSubmit}>
+                        Confirm PIN
+                    </Button>
                 </DialogContent>
             </Dialog>
 
+            {/* SUCCESS MODAL */}
             <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-                <DialogContent className="max-w-md" showCloseButton={false}>
-                    <div className="text-center py-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary mb-4">
-                            <Check className="h-8 w-8 text-primary-foreground" />
-                        </div>
-                        <h2 className="text-xl font-semibold mb-2">Change PIN Successful!</h2>
-                        <p className="text-muted-foreground mb-6">
-                            Your PIN successful changed, please don't forget about yor New PIN
-                        </p>
-                        <Button onClick={handleSuccessOk} className="w-full">
-                            Oke
-                        </Button>
+                <DialogHeader className="hidden">
+                    <DialogTitle></DialogTitle>
+                </DialogHeader>
+                <DialogContent className="max-w-md text-center">
+                    <div className="mx-auto w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white">
+                        <Check className="w-8 h-8" />
                     </div>
+
+                    <h2 className="text-lg font-semibold mt-4">PIN Updated!</h2>
+                    <p className="text-muted-foreground mb-6">Your PIN has been successfully updated.</p>
+                    <Button onClick={() => setShowSuccessModal(false)} className="w-full">OK</Button>
+                </DialogContent>
+            </Dialog>
+
+            {/* AVATAR EDIT */}
+            <Dialog open={showAvatarUploader} onOpenChange={setShowAvatarUploader} modal={false}>
+                <DialogHeader className="hidden">
+                    <DialogTitle>Update Avatar</DialogTitle>
+                </DialogHeader>
+                <DialogContent className="max-w-xs!" onInteractOutside={(event) => event.preventDefault()}>
+                    <h3 className="font-semibold mb-4 text-center">Update Avatar</h3>
+
+                    <div className="flex items-center justify-center">
+                        <ImageUploader
+                            disabled={false}
+                            onUploadSuccess={(url) => {
+                                setEditedEmployee({ ...editedEmployee, avatar: url })
+                                setShowAvatarUploader(false)
+                            }}
+                        />
+                    </div>
+
+                    <Button variant="outline" className="w-full mt-4" onClick={() => setShowAvatarUploader(false)}>
+                        Cancel
+                    </Button>
                 </DialogContent>
             </Dialog>
         </>

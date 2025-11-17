@@ -8,12 +8,14 @@ import { PinPad } from "@/components/login-pin/pin-pad"
 import { PinInput } from "@/components/login-pin/pin-input"
 import { toast } from "sonner"
 import { Spinner } from "@/components/ui/spinner"
+import { useAuth } from "@/context/AuthContext"
 
 export default function LoginPage() {
   const router = useRouter()
   const [pinCode, setPinCode] = useState("");
   const [username, setUsername] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth()
 
   const handleNumberClick = (num: string) => {
     if (pinCode.length < 6) setPinCode(pinCode + num)
@@ -37,12 +39,13 @@ export default function LoginPage() {
         body: JSON.stringify({ username, pinCode }),
       });
 
-      const data = await res.json();
-      // Lưu user vào localStorage (vì token ở cookie HTTP-only)
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      toast.success("Login successfully!");
-      router.push("/dashboard");
+      if (res.ok) {
+        const data = await res.json();
+        login(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        toast.success("Login successfully!");
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       console.error("Error when login:", err);
       toast.error("Unexpected error occurred. Please try again.");

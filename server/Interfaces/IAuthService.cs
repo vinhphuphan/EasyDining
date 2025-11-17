@@ -1,4 +1,4 @@
-using server.DTOs;
+using server.DTOs.User;
 using server.DTOs.Auth;
 using server.Helpers;
 

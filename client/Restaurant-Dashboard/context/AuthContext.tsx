@@ -1,6 +1,8 @@
 "use client"
+import { createContext, useContext, useEffect, useState, ReactNode } from "react"
+
 interface User {
-    id: string
+    id: number
     username: string
     avatar?: string
     role: string
@@ -8,35 +10,50 @@ interface User {
     shiftEnd?: string
 }
 
-import { createContext, useContext, useEffect, useState } from "react"
+type AuthContextType = {
+    user: User | null
+    login: (userData: User) => void
+    logout: () => void
+    updateUser: (updated: User) => void
+}
 
-export const AuthContext = createContext(null)
-
-import { ReactNode } from "react"
+// create a context that can be null until provided
+export const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
 
     useEffect(() => {
+        if (typeof window === "undefined") return
         const stored = localStorage.getItem("user")
         if (stored) setUser(JSON.parse(stored))
     }, [])
 
     const login = (userData: User) => {
         setUser(userData)
-        localStorage.setItem("user", JSON.stringify(userData))
+        if (typeof window !== "undefined") localStorage.setItem("user", JSON.stringify(userData))
     }
 
     const logout = () => {
         setUser(null)
-        localStorage.removeItem("user")
+        if (typeof window !== "undefined") localStorage.removeItem("user")
+    }
+
+    const updateUser = (updated: User) => {
+        setUser(updated)
+        if (typeof window !== "undefined") localStorage.setItem("user", JSON.stringify(updated))
     }
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     )
 }
 
-export const useAuth = () => useContext(AuthContext)
+// strict hook that ensures the context is available
+export const useAuth = () => {
+    const ctx = useContext(AuthContext)
+    if (!ctx) throw new Error("useAuth must be used within an AuthProvider")
+    return ctx
+}
