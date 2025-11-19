@@ -40,7 +40,7 @@ const Index = () => {
   const isScrollingToCategory = useRef(false)
 
   const searchParams = new URLSearchParams(window.location.search)
-  const code = searchParams.get("code") || "AAJ3Y4"
+  const code = searchParams.get("code") || "UNZGUQ"
   useEffect(() => {
     verifyTable(code)
   }, [verifyTable, code])
@@ -159,7 +159,7 @@ const Index = () => {
           >
             {/* Category title with chevron for collapse */}
             <button
-              className="flex items-center w-full justify-between text-2xl font-bold mb-6 border-b-[2px] border-black pb-2 focus:outline-none hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer"
+              className="flex items-center w-full justify-between text-lg md:text-xl lg:text-2xl font-bold mb-6 border-b-[2px] border-black pb-2 focus:outline-none hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer"
               type="button"
               onClick={() => toggleCategory(category)}
               aria-expanded={openCategories[category]}

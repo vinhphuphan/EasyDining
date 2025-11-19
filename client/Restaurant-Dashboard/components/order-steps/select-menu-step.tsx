@@ -234,26 +234,26 @@ export function SelectMenuStep({ formData, setFormData, onNext }: SelectMenuStep
                 </div>
               ))
               }
-            </div>
 
-            <div className="space-y-3 pt-4 border-t">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Sub Total</span>
-                <span className="font-medium">${subtotal.toFixed(2)}</span>
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Sub Total</span>
+                  <span className="font-medium">${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Tax 10%</span>
+                  <span className="font-medium">${tax.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                  <span>Total Payment</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Tax 10%</span>
-                <span className="font-medium">${tax.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                <span>Total Payment</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-            </div>
 
-            <Button size="lg" className="w-full mt-6" onClick={onNext}>
-              Continue →
-            </Button>
+              <Button size="lg" className="w-full mt-6" onClick={onNext}>
+                Continue →
+              </Button>
+            </div>
           </>
         )}
       </div>

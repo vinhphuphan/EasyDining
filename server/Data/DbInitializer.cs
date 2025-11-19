@@ -6,16 +6,16 @@ namespace server.Data;
 
 public class DbInitializer
 {
-    public static void InitDb(WebApplication app)
+    public static async Task InitDb(WebApplication app)
     {
         using var scope = app.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>()
             ?? throw new InvalidOperationException("Failed to retrieve AppDbContext");
 
-        SeedData(context);
+        await SeedData(context);
     }
 
-    private static void SeedData(AppDbContext context)
+    private static async Task SeedData(AppDbContext context)
     {
         // Create or update database
         context.Database.Migrate();

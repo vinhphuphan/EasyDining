@@ -21,7 +21,7 @@ export const MenuItemCard = ({ item, onClick }: MenuItemCardProps) => {
       {/* Item details */}
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-semibold text-lg">
+          <h3 className="font-semibold text-md md:text-lg">
             {item.name}
           </h3>
           {/* Badges */}

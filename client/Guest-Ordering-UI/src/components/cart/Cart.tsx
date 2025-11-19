@@ -14,7 +14,6 @@ import { useCreateOrderMutation } from "@/api/ordersApi"
 import type { Order } from "@/models/order"
 import { Spinner } from "../ui/spinner"
 import type { CartItem } from "@/models/cart"
-import type { VerifyTable } from "@/models/table"
 
 interface CartProps {
   open: boolean
@@ -87,10 +86,10 @@ export const Cart = ({ open, onClose, onOrderSuccess, tableCode }: CartProps) =>
     setIsProcessing(true)
 
     const orderPayload = {
-      tableCode: tableCode, // TODO: replace with dynamic table hash
+      tableCode: tableCode,
       buyerName: buyerName || "Guest",
       buyerEmail: email.trim() ?? "",
-      orderType: "Dine In",
+      orderType: "Dine In" as const,
       items: items.map(i => ({
         menuItemId: i.menuItemId,
         quantity: i.quantity,

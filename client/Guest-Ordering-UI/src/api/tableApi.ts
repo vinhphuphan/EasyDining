@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithErrorHandling } from "./baseApi";
 import type { VerifyTable } from "@/models/table";
+import type { ServiceResult } from "@/models/order";
 
 export const tableApi = createApi({
     reducerPath: 'tableApi',
@@ -12,6 +13,7 @@ export const tableApi = createApi({
                 method: 'GET',
                 params: { code },
             }),
+            transformResponse: (response: ServiceResult<VerifyTable>) => response.data,
         }),
     }),
 })

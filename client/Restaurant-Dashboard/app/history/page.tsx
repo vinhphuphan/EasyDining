@@ -154,7 +154,7 @@ export default function HistoryPage() {
                   >
                     <td className="px-5 py-3 text-sm">{order.tableCode}</td>
                     <td className="px-5 py-3 text-sm">{order.buyerName ?? "-"}</td>
-                    <td className="px-5 py-3 text-sm">{"Dine in"}</td>
+                    <td className="px-5 py-3 text-sm">{order.orderType}</td>
                     <td className="px-5 py-3 text-sm">{order.items.length} items</td>
                     <td className="px-5 py-3 text-sm font-normal">${order.subtotal.toFixed(2)}</td>
                     <td className="px-5 py-3 text-sm text-muted-foreground">
