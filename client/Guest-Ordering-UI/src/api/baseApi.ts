@@ -2,7 +2,7 @@ import { startLoading, stopLoading } from "@/lib/uiSlice";
 import { fetchBaseQuery, type BaseQueryApi, type FetchArgs } from "@reduxjs/toolkit/query";
 
 const customBaseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://localhost:7184/api/'
+    baseUrl: import.meta.env.VITE_API_BASE_URL
 });
 
 export const baseQueryWithErrorHandling = async (

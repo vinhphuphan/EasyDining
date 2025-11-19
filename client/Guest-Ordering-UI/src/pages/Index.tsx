@@ -40,7 +40,7 @@ const Index = () => {
   const isScrollingToCategory = useRef(false)
 
   const searchParams = new URLSearchParams(window.location.search)
-  const code = searchParams.get("code") || "UNZGUQ"
+  const code = searchParams.get("code") || "CQEL5N"
   useEffect(() => {
     verifyTable(code)
   }, [verifyTable, code])

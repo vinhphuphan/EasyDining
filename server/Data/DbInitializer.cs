@@ -184,7 +184,7 @@ public class DbInitializer
         }
         };
             context.MenuItems.AddRange(menuItems);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         // // ===== User =====
@@ -213,7 +213,7 @@ public class DbInitializer
             staff.PinCodeHash = hasher.HashPassword(staff, "111111");
 
             context.Users.AddRange(admin, staff);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         // ===== Tables =====
@@ -227,7 +227,7 @@ public class DbInitializer
                 new Table { Name = "A5", Seats = 2, Status = TableStatus.Available },
                 new Table { Name = "B1", Seats = 6, Status = TableStatus.Available }
             );
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 }
