@@ -13,7 +13,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ReduxProvider } from "@/components/providers/redux-provider";
 import TokenRefresher from "@/components/providers/token-fresher";
 import { SuccessOrderToastProvider } from "@/context/SuccessOrderToastProvider";
-import Header from "@/components/header/header"
+import Header from "@/components/header/Header"
 
 
 
