@@ -35,7 +35,11 @@ builder.Services.AddCors(options =>
                 "https://order.easydining.site",
                 "http://order.easydining.site",
                 "https://dashboard.easydining.site",
-                "http://dashboard.easydining.site"
+                "http://dashboard.easydining.site",
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "https://localhost:5173",
+                "https://localhost:3000"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
