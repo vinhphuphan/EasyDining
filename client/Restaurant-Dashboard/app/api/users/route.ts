@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server"
 import { apiFetch } from "@/lib/apiFetch"
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
-const BACKEND = "https://localhost:7184/api/user"
+const BACKEND = `${process.env.API_BASE_URL}/api/user`
 
 // GET users
 export async function GET() {

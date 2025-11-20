@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server"
 import { apiFetch } from "@/lib/apiFetch"
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
-const BACKEND = "https://localhost:7184/api/orders"
+const BACKEND = `${process.env.API_BASE_URL}/api/orders`
 
 export async function GET(req: Request) {
     const url = new URL(req.url)

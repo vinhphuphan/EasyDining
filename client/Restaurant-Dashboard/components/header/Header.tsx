@@ -24,7 +24,7 @@ export default function Header() {
 
     // Hide header on login page
     if (path?.startsWith("/login",)) return null
-    if (path?.startsWith("/qr-code",)) return null
+    if (path?.startsWith("/qr",)) return null
     if (path?.startsWith("/place-order",)) return null
 
     return (

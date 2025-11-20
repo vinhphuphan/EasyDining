@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { serialize } from "cookie";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 export async function POST(req: Request) {
     const body = await req.json();
 
     // Call API backend ASP.NET Core
-    const res = await fetch("https://localhost:7184/api/auth/login", {
+    const res = await fetch(`${process.env.API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

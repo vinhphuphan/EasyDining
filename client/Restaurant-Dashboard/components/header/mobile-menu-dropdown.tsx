@@ -10,7 +10,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Menu, LogOut, Settings, Pencil, User, Cloud } from "lucide-react"
+import { Menu, LogOut, Settings, Pencil, Cloud } from "lucide-react"
 import { toast } from "sonner"
 import { EmployeeProfileModal } from "@/components/modals/employee-profile-modal"
 
@@ -23,7 +23,7 @@ export default function MobileMenuDropdown({ tabs }: MobileMenuDropdownProps) {
     const [isProfileOpen, setIsProfileOpen] = useState(false)
 
     const currentUser = {
-        id: "01011425",
+        id: 1011425,
         name: "Richardo Wilson",
         role: "Waiter",
         avatar: "/professional-man.jpg",
@@ -103,6 +103,10 @@ export default function MobileMenuDropdown({ tabs }: MobileMenuDropdownProps) {
                 isOpen={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}
                 employee={currentUser}
+                onUpdate={(updatedUser) => {
+                    // handle update (e.g. refresh state, show a toast)
+                    toast.success("Profile updated")
+                }}
             />
         </>
     )

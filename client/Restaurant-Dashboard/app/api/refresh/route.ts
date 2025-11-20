@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { serialize } from "cookie";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 export async function POST() {
     const store = cookies();
     const uid = (await store).get("uid")?.value;
@@ -13,7 +11,7 @@ export async function POST() {
         return NextResponse.json({ message: "No refresh token" }, { status: 401 });
     }
 
-    const res = await fetch("https://localhost:7184/api/auth/refresh-token", {
+    const res = await fetch(`${process.env.API_BASE_URL}/api/auth/refresh-token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: Number(uid), refreshToken }),

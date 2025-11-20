@@ -2,15 +2,13 @@ import { NextResponse } from "next/server";
 import { serialize } from "cookie";
 import { cookies } from "next/headers";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 export async function POST() {
     const store = cookies();
     const uid = (await store).get("uid")?.value;
     const accessToken = (await store).get("accessToken")?.value;
 
     if (uid && accessToken) {
-        await fetch("https://localhost:7184/api/auth/logout", {
+        await fetch(`${process.env.API_BASE_URL}/api/auth/logout`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -61,31 +61,28 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
         <div className="flex border-b">
           <button
             onClick={() => setActiveTab("all")}
-            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "all"
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "all"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             All Notification
           </button>
           <button
             onClick={() => setActiveTab("inventory")}
-            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "inventory"
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "inventory"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Inventory
           </button>
           <button
             onClick={() => setActiveTab("kitchen")}
-            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "kitchen"
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "kitchen"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Kitchen
           </button>
@@ -96,15 +93,13 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
           {filteredNotifications.map((notification) => (
             <div
               key={notification.id}
-              className={`p-4 border-b hover:bg-accent/50 transition-colors ${
-                notification.status === "unread" ? "bg-accent/20" : ""
-              }`}
+              className={`p-4 border-b hover:bg-accent/50 transition-colors ${notification.status === "unread" ? "bg-accent/20" : ""
+                }`}
             >
               <div className="flex gap-3">
                 <div
-                  className={`p-2 rounded-lg h-fit ${
-                    notification.type === "inventory" ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600"
-                  }`}
+                  className={`p-2 rounded-lg h-fit ${notification.type === "inventory" ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600"
+                    }`}
                 >
                   {getIcon(notification.type)}
                 </div>

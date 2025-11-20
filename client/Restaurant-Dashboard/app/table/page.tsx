@@ -152,8 +152,13 @@ export default function TablePage() {
           </div>
         </div>
 
-        {isLoading && <LoadingScreen />}
         {isError && <DataError onRetry={refetch} />}
+
+        {!isLoading && tables?.length === 0 && (
+          <div className="text-center text-muted-foreground py-20">
+            No tables found. Click "Add Table" to create one.
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {(tables ?? []).map((t) => (

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
 import { apiFetch } from "@/lib/apiFetch";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+const BACKEND = `${process.env.API_BASE_URL}/api/tables`
 
 export async function GET() {
-    const res = await apiFetch("https://localhost:7184/api/tables");
+    const res = await apiFetch(BACKEND);
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
 }
@@ -12,7 +12,7 @@ export async function GET() {
 export async function POST(req: Request) {
     const body = await req.json();
 
-    const res = await apiFetch("https://localhost:7184/api/tables", {
+    const res = await apiFetch(BACKEND, {
         method: "POST",
         body: JSON.stringify(body),
     });

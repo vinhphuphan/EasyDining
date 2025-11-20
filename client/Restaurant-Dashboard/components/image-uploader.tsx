@@ -33,7 +33,7 @@ export function ImageUploader({ onUploadSuccess, disabled, existingImage }: Imag
 
     return (
         <CldUploadWidget
-            uploadPreset="yxq2lufb"
+            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_PRESET!}
             onUploadAdded={() => setLoading(true)}
             onSuccess={handleUpload}
             options={{

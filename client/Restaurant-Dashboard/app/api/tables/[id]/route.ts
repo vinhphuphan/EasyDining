@@ -3,7 +3,7 @@ import { apiFetch } from "@/lib/apiFetch"
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-const url = (id: string) => `https://localhost:7184/api/tables/${id}`
+const url = (id: string) => `${process.env.API_BASE_URL}/api/tables/${id}`
 
 // GET table by Id
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {

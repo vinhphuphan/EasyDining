@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server"
 import { apiFetch } from "@/lib/apiFetch"
 
-const url = (id: string) => `https://localhost:7184/api/menuitems/${id}`
+const url = (id: string) => `${process.env.API_BASE_URL}/api/menuitems/${id}`
 
 // GET table by Id
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {

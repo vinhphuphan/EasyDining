@@ -98,7 +98,11 @@ export default function InventoryPage() {
     try {
       await updateMenuItem({
         id: item.id,
-        updates: { isAvailable: !item.isAvailable }
+        updates: {
+          name: item.name,
+          price: item.price,
+          isAvailable: !item.isAvailable
+        }
       }).unwrap()
       // Refetch data after successful update
       refetch()
