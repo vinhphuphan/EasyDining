@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy ASP.Net Core app to Azure Web App - easydining
+name: Build and deploy ASP.NET Core app to Azure Web App (EasyDining)
 
 on:
   push:
@@ -13,49 +10,48 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
     
     env:
       PROJECT_PATH: server/server.csproj
-      PUBLISH_DIR: ./server/bin/Publish
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.x'
+          dotnet-version: "9.x"
 
-      - name: Build with dotnet
-        run: |
-          cd server
-          dotnet build --configuration Release
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.PROJECT_PATH }}
 
-      - name: dotnet publish
-        run: |
-          cd server
-          dotnet publish -c Release
+      - name: Build
+        run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore
 
-      - name: Upload artifact for deployment job
+      - name: Publish
+        run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -o ./published
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: .net-app
-          path: ./server
+          name: easydining-api
+          path: ./published
 
   deploy:
     runs-on: windows-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
-      
+          name: easydining-api
+          path: ./deploy
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -64,10 +60,8 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E4D3C0B0C58946ADA1CA0F9B0828C89C }}
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'easydining'
-          slot-name: 'Production'
-          package: ./server/bin/Publish
-          
+          app-name: "easydining"
+          slot-name: "Production"
+          package: ./deploy
