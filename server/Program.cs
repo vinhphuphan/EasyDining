@@ -32,7 +32,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: CorsPolicy, policy =>
     {
         policy.WithOrigins(
-                "https://order.easydining.site/"
+                "https://order.easydining.site",
+                "http://order.easydining.site"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
