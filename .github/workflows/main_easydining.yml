@@ -14,6 +14,10 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read #This is required for actions/checkout
+    
+    env:
+      PROJECT_PATH: server/server.csproj
+      PUBLISH_DIR: ./server/bin/Publish
 
     steps:
       - uses: actions/checkout@v4
@@ -24,16 +28,20 @@ jobs:
           dotnet-version: '9.x'
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: |
+          cd server
+          dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: |
+          cd server
+          dotnet publish -c Release
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: server/publish
 
   deploy:
     runs-on: windows-latest
@@ -61,5 +69,5 @@ jobs:
         with:
           app-name: 'easydining'
           slot-name: 'Production'
-          package: .
+          package: server/publish
           
