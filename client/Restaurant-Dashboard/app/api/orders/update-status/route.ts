@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { apiFetch } from "@/lib/apiFetch"
 
-const BASE_URL = process.env.API_BASE_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function PUT(req: Request) {
     const body = await req.json()

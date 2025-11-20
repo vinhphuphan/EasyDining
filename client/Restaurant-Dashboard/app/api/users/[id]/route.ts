@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server"
 import { apiFetch } from "@/lib/apiFetch"
 
-const url = (id: string) => `${process.env.API_BASE_URL}/api/user/${id}`
+const url = (id: string) => `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${id}`
 
 // GET user by Id
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {

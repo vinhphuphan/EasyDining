@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server"
 import { apiFetch } from "@/lib/apiFetch"
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
 export async function POST(_: Request, context: { params: Promise<{ id: string }> }) {
     const { id } = await context.params
-    const res = await apiFetch(`${process.env.API_BASE_URL}/api/tables/${id}/checkout`, {
+    const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tables/${id}/checkout`, {
         method: "POST",
     })
 

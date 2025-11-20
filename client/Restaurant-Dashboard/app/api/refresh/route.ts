@@ -11,7 +11,7 @@ export async function POST() {
         return NextResponse.json({ message: "No refresh token" }, { status: 401 });
     }
 
-    const res = await fetch(`${process.env.API_BASE_URL}/api/auth/refresh-token`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/refresh-token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: Number(uid), refreshToken }),

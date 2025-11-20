@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server"
 import { apiFetch } from "@/lib/apiFetch"
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
-const url = (id: string) => `${process.env.API_BASE_URL}/api/tables/${id}`
+const url = (id: string) => `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tables/${id}`
 
 // GET table by Id
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { apiFetch } from "@/lib/apiFetch"
 
-const BACKEND = `${process.env.API_BASE_URL}/api/user`
+const BACKEND = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user`
 
 // GET users
 export async function GET() {

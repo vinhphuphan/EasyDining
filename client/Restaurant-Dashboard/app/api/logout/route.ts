@@ -8,7 +8,7 @@ export async function POST() {
     const accessToken = (await store).get("accessToken")?.value;
 
     if (uid && accessToken) {
-        await fetch(`${process.env.API_BASE_URL}/api/auth/logout`, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/logout`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
