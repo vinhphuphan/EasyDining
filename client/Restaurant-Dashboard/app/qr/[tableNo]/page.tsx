@@ -7,8 +7,8 @@ const TableQrPage = () => {
   const params = useParams();
   const tableNo = params.tableNo;
 
-  const guestBase = process.env.NEXT_PUBLIC_GUEST_ORDER_BASE ?? 'https://order.easydining.com';
-  const qrUrl = `${guestBase}/table=${encodeURIComponent(String(tableNo))}`;
+  const guestBase = process.env.NEXT_PUBLIC_GUEST_ORDER_BASE ?? 'https://order.easydining.site';
+  const qrUrl = `${guestBase}?code=${encodeURIComponent(String(tableNo))}`;
 
   const handlePrint = () => {
     window.print();
