@@ -104,7 +104,7 @@ export function OrderCard({ order, showActions, tableName }: OrderCardProps) {
           )}
 
           <button
-            onClick={() => router.push(`/order/${order.id}`)}
+            onClick={() => router.push(`/order`)}
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground cursor-pointer"
           >
             {order.items.length} Items

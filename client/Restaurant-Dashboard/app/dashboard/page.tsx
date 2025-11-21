@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { CreditCard, Clock, CheckCircle, FileText, ChevronDown, ChefHat } from "lucide-react"
+import { CreditCard, Clock, CheckCircle, ChefHat } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { StatsCard } from "@/components/cards/stats-card"
@@ -12,7 +12,6 @@ import { useCreateOrderModal } from "@/context/CreateOrderModalProvider"
 import { useRouter } from "next/navigation"
 import { useGetOrdersQuery } from "@/store/api/orderApi"
 import { useGetTablesQuery } from "@/store/api/tableApi"
-
 import type { OrderDto } from "@/types/order"
 import { useGetMenuItemsQuery } from "@/store/api/menuApi"
 import { Spinner } from "@/components/ui/spinner"
@@ -28,7 +27,7 @@ export default function DashboardPage() {
   const orders: OrderDto[] = orderRes?.data?.items ?? []
   const sorted = [...orders].sort((a, b) =>
     new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
-
+  const [selectedOrder, setSelectedOrder] = useState<OrderDto | null>(null)
   const tables = tableRes ?? []
   const menuItems = menuRes ?? []
 
