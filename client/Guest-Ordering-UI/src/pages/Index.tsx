@@ -148,7 +148,7 @@ const Index = () => {
       {/* Category navigation */}
       <CategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} categories={categories} />
       {/* Main content area - continuous scroll */}
-      <main className="w-full px-4 py-6 pb-24">
+      <main className="w-full px-6 py-6 pb-24">
         {itemsByCategory.map(({ category, items }) => (
           <section
             key={category}
@@ -188,7 +188,7 @@ const Index = () => {
       </main>
       <button
         onClick={() => setOrdersModalOpen(true)}
-        className="fixed bottom-10 cursor-pointer left-4 z-30 bg-gray-900 text-white p-4 rounded-full shadow-lg hover:bg-gray-800 transition-colors"
+        className="fixed bottom-6 cursor-pointer left-6 z-30 bg-gray-900 text-white p-4 rounded-full shadow-lg hover:bg-gray-800 transition-colors"
         aria-label="View orders"
       >
         <ClipboardList className="w-6 h-6" />

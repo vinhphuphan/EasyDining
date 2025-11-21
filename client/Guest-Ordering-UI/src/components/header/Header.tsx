@@ -17,7 +17,7 @@ export const Header = ({ onCartClick }: HeaderProps) => {
 
   return (
     <header className="sticky top-0 z-50 bg-black text-white">
-      <div className="container mx-auto px-0 md:px-4 py-4">
+      <div className="container mx-auto px-0 md:px-6 py-4">
         {/* Top row: Logo centered, cart on right */}
         <div className="grid grid-cols-3 items-center">
           {/* Empty left column for centering */}
@@ -60,7 +60,7 @@ interface HeaderBannerProps {
 }
 
 export const HeaderBanner = ({ verifyTable }: HeaderBannerProps) => (
-  <div className="w-full bg-black p-4 pt-0">
+  <div className="w-full bg-black px-6 py-4 pt-0">
     <div className="flex items-center justify-center mb-4 w-full">
       <p className="text-xs text-gray-400">Restaurant</p>
     </div>

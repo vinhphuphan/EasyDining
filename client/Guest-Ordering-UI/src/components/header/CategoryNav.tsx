@@ -33,7 +33,7 @@ export const CategoryNav = ({ activeCategory, onCategoryChange, categories }: Ca
 
   return (
     <nav className="sticky top-20 z-40 bg-background border-b border-border">
-      <div ref={scrollRef} className="w-full px-4 overflow-x-auto scrollbar-hide">
+      <div ref={scrollRef} className="w-full px-6 overflow-x-auto scrollbar-hide">
         <div className="flex gap-5 py-3 min-w-max">
           {categories.map((category) => (
             <button
