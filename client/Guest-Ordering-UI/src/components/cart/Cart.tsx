@@ -25,7 +25,8 @@ interface CartProps {
     receiptEmail?: string
     order: Order
   }) => void,
-  tableCode: string
+  tableCode: string,
+  tableName?: string
 }
 
 function resolveDiscount(code: string, items: CartItem[]): number {
@@ -37,14 +38,14 @@ function resolveDiscount(code: string, items: CartItem[]): number {
   }
 }
 
-export const Cart = ({ open, onClose, onOrderSuccess, tableCode }: CartProps) => {
+export const Cart = ({ open, onClose, onOrderSuccess, tableCode, tableName }: CartProps) => {
   const {
     items,
     updateQuantity,
     clearCart,
   } = useCart()
 
-  const [orderNote, setOrderNote] = useState("")
+  const [buyerNote, setBuyerNote] = useState("")
   const [paymentMethod, setPaymentMethod] = useState<"card" | "google-pay" | "cash">("cash")
   const [email, setEmail] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
@@ -52,7 +53,7 @@ export const Cart = ({ open, onClose, onOrderSuccess, tableCode }: CartProps) =>
   const [createOrder] = useCreateOrderMutation();
   const [discountCode, setDiscountCode] = useState("")
   const discount = useMemo(() => resolveDiscount(discountCode, items), [discountCode, items])
-
+  const displayTable = tableName || tableCode || "1";
   // Don't render if modal is closed
   if (!open) return null
 
@@ -65,7 +66,7 @@ export const Cart = ({ open, onClose, onOrderSuccess, tableCode }: CartProps) =>
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-scale-in pointer-events-auto shadow-2xl">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
               <div className="flex items-center gap-3">
-                <div className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold">Table.1</div>
+                <div className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold">Table {displayTable}</div>
               </div>
               <button
                 onClick={onClose}
@@ -89,6 +90,7 @@ export const Cart = ({ open, onClose, onOrderSuccess, tableCode }: CartProps) =>
       tableCode: tableCode,
       buyerName: buyerName || "Guest",
       buyerEmail: email.trim() ?? "",
+      buyerNote: buyerNote.trim() ?? "",
       orderType: "Dine In" as const,
       items: items.map(i => ({
         menuItemId: i.menuItemId,
@@ -139,7 +141,7 @@ export const Cart = ({ open, onClose, onOrderSuccess, tableCode }: CartProps) =>
         <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-scale-in pointer-events-auto shadow-2xl">
           <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
             <div className="flex items-center gap-3">
-              <div className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold">Table.1</div>
+              <div className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold">Table {displayTable}</div>
             </div>
             <button
               onClick={onClose}
@@ -161,8 +163,8 @@ export const Cart = ({ open, onClose, onOrderSuccess, tableCode }: CartProps) =>
               <Textarea
                 id="order-note"
                 placeholder="Add any special requests..."
-                value={orderNote}
-                onChange={(e) => setOrderNote(e.target.value)}
+                value={buyerNote}
+                onChange={(e) => setBuyerNote(e.target.value)}
                 className="min-h-[80px] resize-none"
               />
             </div>

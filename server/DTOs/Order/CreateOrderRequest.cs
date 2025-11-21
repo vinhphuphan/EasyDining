@@ -9,6 +9,7 @@ public class CreateOrderRequest
     public int NumberOfPeople { get; set; }
     public string BuyerName { get; set; } = string.Empty;
     public string? BuyerEmail { get; set; }
+    public string? BuyerNote { get; set; }
 
     [Range(0, double.MaxValue)]
     public decimal Discount { get; set; } = 0m;

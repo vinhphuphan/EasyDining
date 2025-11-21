@@ -5,6 +5,7 @@ export interface Order {
     tableCode: string
     buyerName: string
     buyerEmail: string
+    buyerNote: string
     orderType?: string
     numberOfPeople?: number
     orderDate: string
@@ -37,6 +38,7 @@ export type CreateOrderRequest = {
     numberOfPeople?: number
     buyerName?: string
     buyerEmail?: string
+    buyerNote: string
     discount: number
     items: CreateOrderItem[]
 }

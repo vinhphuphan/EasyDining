@@ -17,6 +17,7 @@ export type OrderFormData = {
   orderType: "Dine In" | "Take Away"
   numberOfPeople: number
   customerName?: string
+  buyerNote?: string
   tableCode?: string
   items: Array<{
     menuItemId: number;
@@ -33,6 +34,7 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
     orderType: "Dine In",
     numberOfPeople: 2,
     customerName: "",
+    buyerNote: "",
     items: [],
   }
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
@@ -69,12 +71,7 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
 
   const handleClose = () => {
     setStep(1)
-    setFormData({
-      orderType: "Dine In",
-      numberOfPeople: 2,
-      customerName: "",
-      items: [],
-    })
+    setFormData(defaultState)
     onClose()
   }
 
@@ -139,7 +136,7 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
           {step === 1 && <OrderInfoStep formData={formData} setFormData={setFormData} onNext={handleNext} />}
           {step === 2 && <SelectTableStep formData={formData} setFormData={setFormData} onNext={handleNext} />}
           {step === 3 && <SelectMenuStep formData={formData} setFormData={setFormData} onNext={handleNext} />}
-          {step === 4 && <OrderSummaryStep formData={formData} onClose={handleClose} onCreated={() => { setFormData(defaultState); setStep(1) }} />}
+          {step === 4 && <OrderSummaryStep formData={formData} setFormData={setFormData} onClose={handleClose} onCreated={() => { setFormData(defaultState); setStep(1) }} />}
         </div>
       </div>
     </div>

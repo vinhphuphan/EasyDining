@@ -58,6 +58,7 @@ export default function OrderPage() {
     pending: orders.filter(o => o.orderStatus === "Pending").length,
     preparing: orders.filter(o => o.orderStatus === "Preparing").length,
     served: orders.filter(o => o.orderStatus === "Served").length,
+    paid: orders.filter(o => o.orderStatus === "Paid").length,
     cancelled: orders.filter(o => o.orderStatus === "Cancelled").length,
   }
 
@@ -111,17 +112,21 @@ export default function OrderPage() {
         {/* Tabs and Sort */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            {["all", "pending", "preparing", "served", "cancelled"].map((t) => (
+            {["all", "pending", "preparing", "served", "paid", "cancelled"].map((t) => (
               <button
                 key={t}
                 onClick={() => setActiveTab(t as any)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === t
+                className={`group px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors ${activeTab === t
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"
                   }`}
               >
                 {t[0].toUpperCase() + t.slice(1)}
-                <Badge className="ml-2">{tabCounts[t as keyof typeof tabCounts]}</Badge>
+                <Badge className={`ml-2 transition-colors 
+                ${activeTab === t
+                    ? "bg-primary-foreground text-primary font-semibold"
+                    : "bg-muted text-muted-foreground group-hover:bg-accent"
+                  }`}>{tabCounts[t as keyof typeof tabCounts]}</Badge>
               </button>
             ))}
           </div>
@@ -156,11 +161,11 @@ export default function OrderPage() {
         </div>
 
         {/* Orders Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {sortedOrders.map(order => (
             <div
               key={order.id}
-              className="p-6 cursor-pointer"
+              className="cursor-pointer"
               onClick={() => setSelectedOrder(order)}
             >
               <OrderCard order={order} showActions tableName={tableNameMap?.get(order.tableCode) ?? order.tableCode} />

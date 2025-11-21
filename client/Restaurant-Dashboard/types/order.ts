@@ -19,6 +19,7 @@ export interface OrderDto {
     numberOfPeople?: number
     buyerName: string
     buyerEmail: string
+    buyerNote: string
     orderDate: string
     items: OrderItemDto[]
     subtotal: number
@@ -42,6 +43,7 @@ export interface CreateOrderRequest {
     numberOfPeople?: number
     buyerName: string
     buyerEmail?: string
+    buyerNote?: string
     discount?: number
     items: CreateOrderItemRequest[]
 }

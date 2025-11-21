@@ -176,6 +176,7 @@ public class OrdersController(AppDbContext context) : ControllerBase
                 NumberOfPeople = request.NumberOfPeople,
                 BuyerName = request.BuyerName,
                 BuyerEmail = request.BuyerEmail ?? string.Empty,
+                BuyerNote = request.BuyerNote ?? string.Empty,
                 OrderItems = orderItems,
                 Subtotal = subtotal,
                 Discount = discount,
@@ -223,6 +224,7 @@ public class OrdersController(AppDbContext context) : ControllerBase
 
         order.BuyerName = dto.BuyerName;
         order.BuyerEmail = dto.BuyerEmail;
+        order.BuyerNote = dto.BuyerNote;
         order.TableCode = dto.TableCode;
         if (!string.IsNullOrWhiteSpace(dto.OrderType))
             order.OrderType = dto.OrderType;

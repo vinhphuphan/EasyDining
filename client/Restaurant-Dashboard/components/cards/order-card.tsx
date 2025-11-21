@@ -8,6 +8,8 @@ import { useUpdateOrderStatusMutation } from "@/store/api/orderApi"
 import type { OrderStatus } from "@/types/order"
 import { toast } from "sonner"
 import { formatOrderDateTime } from "@/lib/utils"
+import { useRouter } from "next/navigation"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
 
 interface OrderCardProps {
   order: OrderDto,
@@ -17,8 +19,14 @@ interface OrderCardProps {
 
 export function OrderCard({ order, showActions, tableName }: OrderCardProps) {
   const [updateStatus, { isLoading: updating }] = useUpdateOrderStatusMutation()
+  const router = useRouter();
   const initials = (order.buyerName || "G").substring(0, 2).toUpperCase()
   const { label: localTime } = formatOrderDateTime(order.orderDate, { timeStyle: "short" })
+  const shortNote = order.buyerNote
+    ? order.buyerNote.length > 0
+      ? order.buyerNote.slice(0, 22) + "..."
+      : order.buyerNote
+    : null
   const handleChange = async (next: OrderStatus) => {
     if (next === order.orderStatus) return;
     try {
@@ -32,9 +40,7 @@ export function OrderCard({ order, showActions, tableName }: OrderCardProps) {
 
   return (
     <Card className="px-0 pb-0 hover:shadow-md transition-shadow overflow-hidden gap-0 w-full">
-
       <div className="w-full space-y-4">
-
         {/* Header */}
         <div className="flex items-center justify-between px-4">
           <div className="text-sm text-muted-foreground">
@@ -73,13 +79,39 @@ export function OrderCard({ order, showActions, tableName }: OrderCardProps) {
 
 
 
-        {/* STATUS */}
-        <div className="flex items-center justify-end mb-4 px-4">
-          <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
+        {/* STATUS + Buyer note */}
+        <div className="flex items-center justify-between mb-4 px-4">
+
+          {order.buyerNote ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="text-xs text-muted-foreground italic max-w-[150px] truncate cursor-help"
+                  >
+                    {shortNote}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="start" className="max-w-xs break-words">
+                  <p className="text-sm">{order.buyerNote}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span className="text-xs text-muted-foreground opacity-50 italic">
+              — no note —
+            </span>
+          )}
+
+          <button
+            onClick={() => router.push(`/order/${order.id}`)}
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground cursor-pointer"
+          >
             {order.items.length} Items
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>
+
 
         <div>
 

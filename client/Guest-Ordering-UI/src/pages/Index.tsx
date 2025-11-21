@@ -220,6 +220,7 @@ const Index = () => {
           setCartModalOpen(false)
         }}
         tableCode={code}
+        tableName={data?.tableName}
       />
       {/* Success toast */}
       <SuccessOrderToast

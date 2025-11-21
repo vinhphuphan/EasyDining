@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { OrderDto } from "@/types/order"
 import { useGetTablesQuery } from "@/store/api/tableApi"
+import { TooltipProvider } from "../ui/tooltip"
 
 interface OrderDetailModalProps {
   order: OrderDto
@@ -43,6 +44,10 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
     }
   }
 
+  const shortNote = order.buyerNote && order.buyerNote.length > 80
+    ? order.buyerNote.slice(0, 80) + "..."
+    : order.buyerNote;
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-background rounded-2xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -78,6 +83,16 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
               <div className="font-semibold">{order.buyerName || "Guest"}</div>
             </div>
           </div>
+
+          {/* Buyer Note */}
+          {order.buyerNote && order.buyerNote.trim().length > 0 && (
+            <div className="mb-6 p-4 border rounded-lg bg-muted/30">
+              <h3 className="font-semibold text-sm mb-2">Customer Note</h3>
+              <p className="text-sm text-muted-foreground cursor-pointer line-clamp-3 leading-relaxed">
+                {order.buyerNote}
+              </p>
+            </div>
+          )}
 
           {/* Status */}
           <div className="flex items-center gap-3 mb-6 p-4 rounded-lg bg-muted/50">

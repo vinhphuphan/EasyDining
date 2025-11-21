@@ -9,6 +9,7 @@ public class Order : BaseEntity
     public int? NumberOfPeople { get; set; }
     public string BuyerName { get; set; } = string.Empty;
     public string BuyerEmail { get; set; } = string.Empty;
+    public string? BuyerNote { get; set; } = string.Empty;
     public DateTime OrderDate { get; set; } = DateTime.UtcNow;
     public List<OrderItem> OrderItems { get; set; } = [];
     public decimal Subtotal { get; set; }

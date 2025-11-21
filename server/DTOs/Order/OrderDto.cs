@@ -12,6 +12,8 @@ public class OrderDto
     public int? NumberOfPeople { get; set; }
     public string BuyerName { get; set; } = string.Empty;
     public string BuyerEmail { get; set; } = string.Empty;
+    public string? BuyerNote { get; set; } = string.Empty;
+
     public DateTime OrderDate { get; set; }
     public List<OrderItemDto> Items { get; set; } = [];
     public decimal Subtotal { get; set; }

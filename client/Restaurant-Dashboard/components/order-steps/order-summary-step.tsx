@@ -14,9 +14,10 @@ interface OrderSummaryStepProps {
   formData: OrderFormData
   onClose: () => void
   onCreated: () => void
+  setFormData: (data: OrderFormData) => void
 }
 
-export function OrderSummaryStep({ formData, onClose, onCreated }: OrderSummaryStepProps) {
+export function OrderSummaryStep({ formData, onClose, onCreated, setFormData }: OrderSummaryStepProps) {
   const [showSuccess, setShowSuccess] = useState(false)
   const [recentOrder, setRecentOrder] = useState<OrderDto | null>(null)
   const subtotal = formData.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -43,6 +44,7 @@ export function OrderSummaryStep({ formData, onClose, onCreated }: OrderSummaryS
         numberOfPeople: formData.numberOfPeople,
         buyerName: formData.customerName || "Guest",
         buyerEmail: undefined,
+        buyerNote: formData.buyerNote?.trim() ?? "",
         items: formData.items.map(i => ({
           menuItemId: Number(i.menuItemId),
           quantity: i.quantity,
@@ -74,7 +76,7 @@ export function OrderSummaryStep({ formData, onClose, onCreated }: OrderSummaryS
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-lg font-semibold mb-5 flex items-center gap-3">
+        <h2 className="text-lg font-semibold mb-5 flex items-center gap-2">
           <User className="h-5 w-5" />
           Customer Information
         </h2>
@@ -112,7 +114,7 @@ export function OrderSummaryStep({ formData, onClose, onCreated }: OrderSummaryS
                 <Table className="h-4 w-4" />
                 Table Number
               </div>
-              <div className="text-lg font-bold">{formData.tableCode || "Take Away"}</div>
+              <div className="text-md font-semibold">{formData.tableCode || "Take Away"}</div>
             </div>
 
             <div className="p-4 rounded-xl border">
@@ -120,7 +122,7 @@ export function OrderSummaryStep({ formData, onClose, onCreated }: OrderSummaryS
                 <Users className="h-4 w-4" />
                 People
               </div>
-              <div className="text-xl font-bold">{formData.numberOfPeople}</div>
+              <div className="text-lg font-semibold">{formData.numberOfPeople}</div>
             </div>
 
             <div className="p-4 rounded-xl border">
@@ -128,9 +130,23 @@ export function OrderSummaryStep({ formData, onClose, onCreated }: OrderSummaryS
                 <User className="h-4 w-4" />
                 Customer Name
               </div>
-              <div className="text-xl font-bold">{formData.customerName?.trim() || "Guest"}</div>
+              <div className="text-lg font-semibold">{formData.customerName?.trim() || "Guest"}</div>
             </div>
           </div>
+        </div>
+
+        {/* Order Note */}
+        <div className="mt-6">
+          <label htmlFor="order-note" className="text-base font-semibold mb-2 block">
+            Order Note
+          </label>
+          <textarea
+            id="order-note"
+            placeholder="Add any special requests..."
+            value={formData.buyerNote ?? ""}
+            onChange={(e) => setFormData({ ...formData, buyerNote: e.target.value })}
+            className="min-h-[90px] w-full border rounded-lg p-3 focus:ring-primary resize-none"
+          />
         </div>
 
         {/* Total Section */}
@@ -144,7 +160,7 @@ export function OrderSummaryStep({ formData, onClose, onCreated }: OrderSummaryS
               <span className="text-muted-foreground">Tax 10%</span>
               <span className="font-medium">${tax.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-lg font-bold pt-3 border-t">
+            <div className="flex justify-between text-lg font-semibold pt-3 border-t">
               <span>Total Payment</span>
               <span className="text-primary">${total.toFixed(2)}</span>
             </div>
@@ -152,7 +168,7 @@ export function OrderSummaryStep({ formData, onClose, onCreated }: OrderSummaryS
         </div>
 
         {/* Create Order Button */}
-        <Button size="lg" className="w-full mt-8 h-14 text-lg" onClick={handleCreateOrder} disabled={isLoading}>
+        <Button size="lg" className="w-full mt-8 h-14 text-lg font-medium" onClick={handleCreateOrder} disabled={isLoading}>
           Create Order and Sent to Kitchen
         </Button>
       </div>
