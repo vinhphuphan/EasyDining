@@ -117,7 +117,7 @@ export default function DashboardPage() {
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <StatsCard title="Total Earning" value={`$${totalEarning.toLocaleString()}`} icon={CreditCard} />
-            <StatsCard title="Pending" value={inProgressOrders.length} icon={Clock} iconColor="text-primary" />
+            <StatsCard title="Pending" value={pendingOrders.length} icon={Clock} iconColor="text-primary" />
             <StatsCard title="Preparing" value={preparingOrders.length} icon={ChefHat} iconColor="text-orange-600" />
             <StatsCard title="Completed" value={completedOrders.length} icon={CheckCircle} iconColor="text-green-600" />
           </div>
