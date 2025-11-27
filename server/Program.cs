@@ -22,7 +22,10 @@ builder.Services
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        x => x.EnableRetryOnFailure()
+    )
+);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
@@ -67,12 +70,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+app.MapOpenApi();
+
+app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
 
@@ -84,6 +84,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-await DbInitializer.InitDb(app);
-
+if (app.Environment.IsDevelopment())
+{
+    try
+    {
+        await DbInitializer.InitDb(app);
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Database initialization failed during development.");
+    }
+}
 app.Run();
